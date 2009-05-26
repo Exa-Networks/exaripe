@@ -12,7 +12,7 @@ class CommandLine (dict):
 		'verbose':	('verbose','v','store_true','verbose'),
 
 		'asn':		('asn','a','store','the asn of your network'),
-		'macro':	('macro','m','store','the AS-MACRO used when exporting to peers'),
+		'macro':	('macro','s','store','the AS-MACRO (AS-SET) used when exporting to peers'),
 
 		# for source/juniper - locate-juniper
 		'folder':	('folder','f','store_true','where to look for the configuration files'),
@@ -20,9 +20,10 @@ class CommandLine (dict):
 
 		# for parser/juniper - parser-juniper
 		'description-regex':	('description-regex','d','store','the regex to extract information from the juniper peer description example: (?P<peer-accepted-asset>.*?)\|(?P<peer-name>.*?)\|(?P<peer-email>[^|]*)\|?(?P<peer-announced-asset>.*)'),
-		'policy-peer':		('peer','p','append','the policy used in the router configuration used for peers'),
-		'policy-transit':	('transit','t','append','the policy used in the router configuration used for transit'),
-		'policy-customer':	('customer','c','append','the policy used in the router configuration used for customers'),
+		'policy-peer':		('peer','p','append','the policy used in the router configuration for peers'),
+		'policy-transit':	('transit','t','append','the policy used in the router configuration for transit'),
+		'policy-customer':	('customer','c','append','the policy used in the router configuration for customers'),
+		'policy-multicast':	('multicast','m','append','the policiy used in the router configuration for multicast'),
 
 		# for export/ripe - export-ripe
 		'export':	('export','e','append','what type of connection should be exported (peer,transit,customer)'),

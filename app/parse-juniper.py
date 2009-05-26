@@ -14,7 +14,7 @@ parse one or more juniper configuration provided on stdin
 and generate an easily parseable list of all bgp session
 """
 
-cmd = CommandLine(usage,['asn','macro','description-regex','policy-peer','policy-transit','policy-customer'])
+cmd = CommandLine(usage,['asn','macro','description-regex','policy-peer','policy-transit','policy-customer','policy-multicast'])
 
 option_ripe = OptionsRIPE()
 option_juniper = OptionsJuniper()
@@ -25,6 +25,7 @@ cmd_macro = cmd['macro']
 cmd_peer = cmd['policy-peer'] 
 cmd_customer = cmd['policy-customer']
 cmd_transit = cmd['policy-transit']
+cmd_multicast = cmd['policy-multicast']
 
 asn = option_ripe['asn'] if cmd_asn is None else cmd_asn
 try:
@@ -38,12 +39,13 @@ macro = option_ripe['macro'] if cmd_macro is None else cmd_macro
 regex = option_juniper['regex'] if cmd_regex is None else cmd_regex
 peer = option_juniper['peer'].split(' ') if cmd_peer is None else cmd_peer
 customer = option_juniper['customer'].split(' ') if cmd_customer is None else cmd_customer
-transit =  option_juniper['transit'].split(' ') if cmd_transit is None else cmd_transit
+transit = option_juniper['transit'].split(' ') if cmd_transit is None else cmd_transit
+multicast = option_juniper['multicast'].split(' ') if cmd_multicast is None else cmd_multicast
 
 if peer == [] and customer == [] and transit == []:
 	usage('you need to specify at least on of the option -p,-t,-c with a parameter')
 
-parser = ParserJuniper (asn,macro,regex,peer,transit,customer)
+parser = ParserJuniper (asn,macro,regex,peer,transit,customer,multicast)
 
 found = False
 for r in parser.parse(sys.stdin):
