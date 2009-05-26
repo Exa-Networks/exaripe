@@ -1,0 +1,13 @@
+#!/bin/sh
+
+dirname=`dirname $0`
+
+if [[ $dirname == /* ]]; then
+	path=$dirname/..
+else
+	cd `pwd`/$dirname/.. > /dev/null
+	path=`pwd`
+	cd - > /dev/null
+fi
+
+env PYTHONPATH=$path/lib:$path/../lib ETC=$path/etc $path/app/`basename $0`.py $@

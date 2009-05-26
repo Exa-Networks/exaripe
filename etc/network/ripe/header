@@ -1,0 +1,11 @@
+[header]
+aut-num:        AS12345
+as-name:        EXA-ISP
+descr:          ISP Limited
+descr:          ISP Address
+admin-c:        ISP-RIPE
+tech-c:         ISP-RIPE
+mnt-by:         ISP-DBM-MNT
+mnt-routes:     ISP-DBM-MNT
+source:         RIPE
+remarks:        ---------------------------------------------------

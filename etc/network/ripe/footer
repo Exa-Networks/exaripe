@@ -1,0 +1,12 @@
+[footer]
+remarks:        CONTACT
+remarks:        ===================================================
+remarks:        transit          transit@isp.com
+remarks:        peering          peering@isp.com
+remarks:        report spam      abuse@isp.com 
+remarks:        security issues  irt@isp.com   (IRT-ISP)
+remarks:        other IP matters noc@isp.com
+remarks:        ---------------------------------------------------
+remarks:        Generated - time : %(generated)s
+remarks:        ===================================================
+changed:        noc@isp.com
