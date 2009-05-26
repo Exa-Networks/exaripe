@@ -35,8 +35,8 @@ sent = mailer.send(message)
 		
 if not sent:
 	print >> sys.stderr , 'could not send ripe update',
-	if mail.error != None:
-		print >> sys.stderr , str(mail.error)
+	if mailer.error != None:
+		print >> sys.stderr , str(mailer.error)
 	else:
 		print >> sys.stderr
 	sys.exit(1)
