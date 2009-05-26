@@ -4,6 +4,7 @@ class Juniper (object):
 	invalid_peer = ['something-unique-the-regex-will-not-match-for-peer']
 	invalid_transit = ['something-unique-the-regex-will-not-match-for-transit']
 	invalid_customer = ['something-unique-the-regex-will-not-match-for-customer']
+	invalid_multicast = ['something-unique-the-regex-will-not-match-for-multicast']
 
 	expr_router = re.compile('\s+host-name (.*);')
 	expr_group = re.compile('\s+(inactive:\s*)?group (.*) {')
@@ -12,17 +13,19 @@ class Juniper (object):
 	expr_local = re.compile('\s+local-address (.*);')
 	expr_export = re.compile('\s+export ')
 
-	def __init__ (self,asn,announced_set,regex,peer=None,transit=None,customer=None):
+	def __init__ (self,asn,announced_set,regex,peer=None,transit=None,customer=None,multicast=None):
 		self.asn = asn
 		self.announced_set = announced_set.upper()
 
 		peer = peer if peer else self.invalid_peer
 		transit = transit if transit else self.invalid_transit
 		customer = customer if customer else self.invalid_customer
+		multicast = multicast if multicast else self.invalid_multicast
 
 		self.expr_peer = re.compile('\s+export \[ *.* *('+'|'.join(peer)+') *.* *]?')
 		self.expr_transit = re.compile('\s+export \[\s*.*\s*('+'|'.join(transit)+')\s*.*\s*]?')
 		self.expr_customer = re.compile('\s+export \[\s*.*\s*('+'|'.join(customer)+')\s*.*\s*]?')
+		self.expr_multicast = re.compile('\s+export \[\s*.*\s*('+'|'.join(multicast)+')\s*.*\s*]?')
 		
 		self.expr_desc = re.compile('\s+description "%s"' % regex)
 
@@ -38,6 +41,7 @@ class Juniper (object):
 		group = ''
 		type = 'unknown'
 		router = ''
+		policy = ''
 		inactive_group = False
 		inactive_neighbor = False
 	
@@ -99,6 +103,7 @@ class Juniper (object):
 				match_peer = self.expr_peer.search(line)
 				match_transit = self.expr_transit.search(line)
 				match_customer = self.expr_customer.search(line)
+				match_multicast = self.expr_multicast.search(line)
 				if match_peer:
 					type = 'peer'
 					match_count += 1
@@ -111,6 +116,10 @@ class Juniper (object):
 				if match_count != 1:
 					type = 'unknown'
 					continue
+				if match_multicast:
+					policy = 'multicast'
+				else:
+					policy = 'unicast'
 	
 			# Parse the information stored in the description
 			match = self.expr_desc.search(line)
@@ -154,7 +163,7 @@ class Juniper (object):
 					print >> sys.stderr, 'can not extract router name'
 					sys.exit(1)
 	
-				yield "%s|%s|%s|%s|%s|%s|%s|%s|%s|%s" % (router,export,group,asn,announce,src,dest,macro,mail,name)
+				yield "%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s" % (router,export,group,asn,announce,policy,src,dest,macro,mail,name)
 				# do not clear src or group, it could be define for more than one peer
 				dest = ''
 				macro = ''

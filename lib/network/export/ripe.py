@@ -6,9 +6,9 @@ class RIPE (object):
 
 	def parse (self,line):
 		try:
-			router,atype,group,asn,announce,src,dest,macro,mail,name = line.strip().split('|')
+			data = line.strip().split('|')
+			router,atype,group,asn,announce,policy,src,dest,macro,mail,name = data
 		except:
-			print "[%s]" %line.strip()
 			return False
 
 		if src.count(':'):
@@ -21,7 +21,7 @@ class RIPE (object):
 			self.data[nasn] = {}
 		if not self.data[nasn].has_key(atype):
 			self.data[nasn][atype] = []
-		self.data[nasn][atype].append((router,atype,group,asn,announce,src,dest,macro,mail,name))
+		self.data[nasn][atype].append(data)
 
 		return True
 
@@ -38,7 +38,7 @@ class RIPE (object):
 				ordered = {4:{},6:{}}
 				inc = 0
 				for data in self.data[asn][atype]:
-					router,atype,group,asn,announce,src,dest,macro,mail,name = data
+					router,atype,group,asn,announce,policy,src,dest,macro,mail,name = data
 					if dest.count('.'):
 						a,b,c,d = dest.split('.')
 						ipn = (int(a) << 24) + (int(b) << 16) + (int(c) << 8) + int(d)
@@ -81,12 +81,13 @@ class RIPE (object):
 		return result
 
 	def _generate (self,data):
-		router,atype,group,asn,announce,src,dest,macro,mail,name = data
+		router,atype,group,asn,announce,policy,src,dest,macro,mail,name = data
 
+		inet = '6' if src.count(':') else '4'
 		at = "%s at %s" % (dest.lower(),src.lower())
 		if macro == 'ANY':
 			macro = 'ANY and not {0.0.0.0/0}' if src.count('.') else 'ANY and not {::/0}'
 
-		accept = "mp-import:      afi ipv4.unicast from AS%s %s accept %s" % (asn,at,macro)
-		announce = "mp-export:      afi ipv4.unicast to AS%s %s announce %s" % (asn,at,announce)
+		accept = "mp-import:      afi ipv%s.%s from AS%s %s accept %s" % (inet,policy,asn,at,macro)
+		announce = "mp-export:      afi ipv%s.%s to AS%s %s announce %s" % (inet,policy,asn,at,announce)
 	 	return accept,announce
