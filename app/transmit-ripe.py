@@ -27,7 +27,7 @@ if not production:
 	sys.exit(0)
 
 # XXX: Should really perform an DNS MX QUERY here ..
-mailer.mx('postman.ripe.net')
+mailer.mx('postgirl.ripe.net')
 mailer.sender(sender)
 mailer.recipient('auto-dbm@ripe.net')
 mailer.subject('')
