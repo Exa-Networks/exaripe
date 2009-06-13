@@ -1,5 +1,7 @@
 import re
 
+from network import address
+
 # TODO: should list all the peers and find the ones we have no description for to report them
 
 class Cisco (object):
@@ -7,7 +9,7 @@ class Cisco (object):
 	invalid_transit = ['something-unique-the-regex-will-not-match-for-transit']
 	invalid_customer = ['something-unique-the-regex-will-not-match-for-customer']
 
-	regex_ipv4 = '(\d|\d{2}|1\d{2}|2[0-4]\d|25[0-5])\.(\d|\d{2}|1\d{2}|2[0-4]\d|25[0-5])\.(\d|\d{2}|1\d{2}|2[0-4]\d|25[0-5])\.(\d|\d{2}|1\d{2}|2[0-4]\d|25[0-5])'
+	regex_ipv4 = '(25[0-5]|2[0-4]\d|1\d{2}|\d{2}|\d)\.(25[0-5]|2[0-4]\d|1\d{2}|\d{2}|\d)\.(25[0-5]|2[0-4]\d|1\d{2}|\d{2}|\d)\.(25[0-5]|2[0-4]\d|1\d{2}|\d{2}|\d)'
 	# taken from http://forums.dartware.com/viewtopic.php?t=452
 	regex_ipv6 = '((([0-9A-Fa-f]{1,4}:){7}(([0-9A-Fa-f]{1,4})|:))|(([0-9A-Fa-f]{1,4}:){6}(:|((25[0-5]|2[0-4]\d|[01]?\d{1,2})(\.(25[0-5]|2[0-4]\d|[01]?\d{1,2})){3})|(:[0-9A-Fa-f]{1,4})))|(([0-9A-Fa-f]{1,4}:){5}((:((25[0-5]|2[0-4]\d|[01]?\d{1,2})(\.(25[0-5]|2[0-4]\d|[01]?\d{1,2})){3})?)|((:[0-9A-Fa-f]{1,4}){1,2})))|(([0-9A-Fa-f]{1,4}:){4}(:[0-9A-Fa-f]{1,4}){0,1}((:((25[0-5]|2[0-4]\d|[01]?\d{1,2})(\.(25[0-5]|2[0-4]\d|[01]?\d{1,2})){3})?)|((:[0-9A-Fa-f]{1,4}){1,2})))|(([0-9A-Fa-f]{1,4}:){3}(:[0-9A-Fa-f]{1,4}){0,2}((:((25[0-5]|2[0-4]\d|[01]?\d{1,2})(\.(25[0-5]|2[0-4]\d|[01]?\d{1,2})){3})?)|((:[0-9A-Fa-f]{1,4}){1,2})))|(([0-9A-Fa-f]{1,4}:){2}(:[0-9A-Fa-f]{1,4}){0,3}((:((25[0-5]|2[0-4]\d|[01]?\d{1,2})(\.(25[0-5]|2[0-4]\d|[01]?\d{1,2})){3})?)|((:[0-9A-Fa-f]{1,4}){1,2})))|(([0-9A-Fa-f]{1,4}:)(:[0-9A-Fa-f]{1,4}){0,4}((:((25[0-5]|2[0-4]\d|[01]?\d{1,2})(\.(25[0-5]|2[0-4]\d|[01]?\d{1,2})){3})?)|((:[0-9A-Fa-f]{1,4}){1,2})))|(:(:[0-9A-Fa-f]{1,4}){0,5}((:((25[0-5]|2[0-4]\d|[01]?\d{1,2})(\.(25[0-5]|2[0-4]\d|[01]?\d{1,2})){3})?)|((:[0-9A-Fa-f]{1,4}){1,2})))|(((25[0-5]|2[0-4]\d|[01]?\d{1,2})(\.(25[0-5]|2[0-4]\d|[01]?\d{1,2})){3})))(%.+)?'
 
@@ -50,6 +52,7 @@ class Cisco (object):
 
 	def parse (self,stream):
 		neighbors = {}
+		network = {}
 		group_asn = {}
 		peer_group = {}
 		v4_interface = {}
@@ -93,6 +96,7 @@ class Cisco (object):
 				match = self.expr_ipv4.search(line)
 				if match:
 					v4_interface[match.group('ip')] = match.group('netmask')
+					network[address.IPv4NetworkNetmask(match.group('ip'),match.group('netmask'))] = match.group('ip')
 					continue
 				match = self.expr_ipv6.search(line)
 				if match:
@@ -184,7 +188,11 @@ class Cisco (object):
 					continue
 				continue
 
-		debug = True
+		if router == '':
+			print >> sys.stderr, 'can not extract router name'
+			sys.exit(1)
+
+		debug = False
 
 		for dest in neighbors.keys():
 			if dest in ignore:
@@ -221,7 +229,16 @@ class Cisco (object):
 				continue
 
 			# hard work to get it from the interface commiting the current work first ...
-			src = 'a.b.c.d'
+			if address.isIPv4(dest):
+				src = '0.0.0.0'
+				for r in range(32,0,-1):
+					m = address.IPv4bitsToNetmask(r)
+					n = address.IPv4NetworkNetmask(dest,m)
+					if network.has_key(n):
+						src = network[n]
+						continue
+			else:
+				src = '::'
 
 			if type == 'peer' and macro != '' and dest != '' and src != '':
 				if announce == '': announce = self.announced_set
@@ -241,34 +258,3 @@ class Cisco (object):
 				export = 'error ' + type
 				
 			yield "%s|%s|%s|%s|%s|%s|%s|%s|%s|%s" % (router,export,group,asn,announce,src,dest,macro,mail,name)
-
-	def nothing(self):
-			match = self.expr_asn.search(line)
-			if match:
-				macro = macro.upper()
-				announce = announce.upper()
-	
-				asn = match.group(1)
-				if type == 'peer' and macro != '' and dest != '' and src != '':
-					if announce == '': announce = self.announced_set
-					export = type
-				elif type == 'transit' and dest != '' and src != '' and macro == 'ANY':
-					if announce == '': announce = 'ANY'
-					export = type
-				elif type == 'customer' and dest != '' and src != '' and macro != '':
-					if announce == '': announce = 'ANY'
-					export = type
-				elif asn == self.asn:
-					type = 'ibgp'
-					export = type
-				elif type == 'unknown':
-					export = type
-				else:
-					export = 'error ' + type
-	
-				if router == '':
-					print >> sys.stderr, 'can not extract router name'
-					sys.exit(1)
-	
-				yield "%s|%s|%s|%s|%s|%s|%s|%s|%s|%s" % (router,export,group,asn,announce,src,dest,macro,mail,name)
-
