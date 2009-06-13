@@ -1,5 +1,8 @@
 import re
 
+# TODO: family inet { unicast }
+# will require to take care of the bgp { group { neigbourg }} hierarchy
+
 class Juniper (object):
 	invalid_peer = ['something-unique-the-regex-will-not-match-for-peer']
 	invalid_transit = ['something-unique-the-regex-will-not-match-for-transit']
