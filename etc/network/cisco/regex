@@ -1,1 +1,1 @@
-((?P<peer_accepted_asset>.*?)\|)?(?P<peer_name>.*?)(\|(?P<peer_email>[^|]*))?(\|?(?P<peer_announced_asset>.*))?
+(?P<peer_accepted_asset>.*?)\|(?P<peer_name>.*?)\|(?P<peer_email>[^|]*)\|?(?P<peer_announced_asset>.*)
