@@ -32,7 +32,8 @@ try:
 		asn = asn[:2]
 	asn = str(int(asn))
 except:
-	usage('invalid ASN')
+	print >> sys.stderr, 'invalid ASN'
+	sys.exit(1)
 
 macro = option_ripe['macro'] if cmd_macro is None else cmd_macro
 regex = option_cisco['regex'] if cmd_regex is None else cmd_regex
@@ -41,7 +42,8 @@ customer = option_cisco['customer'].split(' ') if cmd_customer is None else cmd_
 transit =  option_cisco['transit'].split(' ') if cmd_transit is None else cmd_transit
 
 if peer == [] and customer == [] and transit == []:
-	usage('you need to specify at least on of the option -p,-t,-c with a parameter')
+	print >> sys.stderr, 'you need to specify at least on of the option -p,-t,-c with a parameter'
+	sys.exit(1)
 
 parser = ParserCisco (asn,macro,regex,peer,transit,customer)
 
@@ -51,4 +53,5 @@ for r in parser.parse(sys.stdin):
 	print r
 	
 if not found:
-	usage('could not find a single bgp relation')
+	print >> sys.stderr, 'could not find a single bgp relation'
+	sys.exit(1)

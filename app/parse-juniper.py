@@ -33,7 +33,8 @@ try:
 		asn = asn[:2]
 	asn = str(int(asn))
 except:
-	usage('invalid ASN')
+	print >> sys.stderr, 'invalid ASN'
+	sys.exit(1)
 
 macro = option_ripe['macro'] if cmd_macro is None else cmd_macro
 regex = option_juniper['regex'] if cmd_regex is None else cmd_regex
@@ -43,7 +44,8 @@ transit = option_juniper['transit'].split(' ') if cmd_transit is None else cmd_t
 multicast = option_juniper['multicast'].split(' ') if cmd_multicast is None else cmd_multicast
 
 if peer == [] and customer == [] and transit == []:
-	usage('you need to specify at least on of the option -p,-t,-c with a parameter')
+	print >> sys.stderr, 'you need to specify at least on of the option -p,-t,-c with a parameter'
+	sys.exit(1)
 
 parser = ParserJuniper (asn,macro,regex,peer,transit,customer,multicast)
 
@@ -53,4 +55,5 @@ for r in parser.parse(sys.stdin):
 	print r
 	
 if not found:
-	usage('could not find a single bgp relation')
+	print >> sys.stderr, 'could not find a single bgp relation'
+	sys.exit(1)

@@ -26,7 +26,7 @@ exporter = ExportRIPE()
 
 for line in sys.stdin.readlines():
 	if not exporter.parse(line):
-		print "problem parsing line:\n" + line.strip()
+		print >> sys.stderr, "problem parsing line:\n" + line.strip()
 		sys.exit(1)
 		
 body = exporter.generate(display_options)
