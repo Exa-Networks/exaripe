@@ -44,6 +44,30 @@ def longtoIPv4 (l):
 		a, b, c, d = struct.unpack('BBBB', ip)
 		return '.'.join([i.__str__() for i in a, b, c, d])
 
+def IPv6tohex (ips):
+	ips = ips.lower()
+	p = ips.split(':')
+	l = len(p)
+	r = ''
+	for i in xrange(l):
+		n = p[i]
+		if n == '':
+			r += '0000'*(8-l)
+			continue
+		pad = 4-len(n)
+		n = '0'*pad + n
+		r += n
+	return r
+
+def hextoIPv6 (ip):
+	r = ''
+	for s in xrange(0,28,4):
+		p = ip[s:s+4]
+		while p and p[0] == '0':
+			p = p[1:]
+		r += p + ':'
+	return r[:-1]
+
 #	d = value & 255
 #	c = (value >> 8) & 255
 #	b = (value >> 16) & 255
@@ -84,7 +108,7 @@ def sanitiseIPv4 (ips):
 		if i != l-1:
 			v = v << (8*(3-i))
 		r += v
-	return toip(r % 0x100000000)
+	return longtoIPv4(r % 0x100000000)
 
 # is the data an ip of the form a,b,c,d
 # input : string : an ip 
@@ -197,7 +221,7 @@ def decomposeRange(network,size):
 		if nb_ranges != len(subsize):
 			nb_ranges = len(subsize)
 		else:
-			raise "Can not get here", str(toip(network)) + " " + str(size) + " " + str(subsize)
+			raise "Can not get here", str(longtoIPv4(network)) + " " + str(size) + " " + str(subsize)
 	return result
 
 # return the /size format of a netmask
@@ -229,3 +253,4 @@ def IPv4NetworkBits (ip,bits):
 	s = IPv4BitsToSize(bits)
 	m = l / s
 	return longtoIPv4(m*s)
+

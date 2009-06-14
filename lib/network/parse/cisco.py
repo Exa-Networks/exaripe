@@ -1,4 +1,5 @@
 import re
+import sys
 
 from network import address
 
@@ -28,9 +29,9 @@ class Cisco (object):
 	expr_group_remote_asn = re.compile('\s*neighbor\s+(?P<peer_group>[a-zA-Z0-9\-]+)\s+remote-as\s+(?P<asn>\d+)\s*')
 	expr_group_update_source = re.compile('\s*neighbor\s+(?P<peer_group>[a-zA-Z0-9\-]+)\s+update-source\s+%ss*' % regex_interface)
 
-	expr_peer_group = re.compile('\s*neighbor\s+(?P<peer_group>%s|%s)\s+peer-group\s+(?P<name>.*)\s*' % (regex_ipv4,regex_ipv6))
+	expr_peer_group = re.compile('\s*neighbor\s+(?P<neighbor>(?P<neighbor_v4>%s)|(?P<neighbor_v6>%s))\s+peer-group\s+(?P<peer_group>.*)\s*' % (regex_ipv4,regex_ipv6))
 
-	expr_any_neighbor = re.compile('\s*neighbor\s+(?P<neighbor>%s|%s)\s+.*' % (regex_ipv4,regex_ipv6))
+	expr_any_neighbor = re.compile('\s*neighbor\s+(?P<neighbor>(?P<neighbor_v4>%s)|(?P<neighbor_v6>%s))\s+.*' % (regex_ipv4,regex_ipv6))
 
 	expr_no_neighbor_ipv4 = re.compile('\s*no\s+neighbor\s+(?P<neighbor>%s)\s+activate' % regex_ipv4)
 	expr_no_neighbor_ipv6 = re.compile('\s*no\s+neighbor\s+(?P<neighbor>%s)\s+activate' % regex_ipv6)
@@ -52,6 +53,12 @@ class Cisco (object):
 		self.expr_descr = re.compile('\s*neighbor\s+(?P<neighbor>(?P<neighbor_v4>%s)|(?P<neighbor_v6>%s))\s+description\s+%s\s*' % (self.regex_ipv4,self.regex_ipv6,regex))
 
 		#print '\s*neighbor (?P<neighbor>%s|%s)\s+description\s+%s\s*' % (self.regex_ipv4,self.regex_ipv6,regex)
+
+	def _neighbor (self,match):
+		if match.group('neighbor_v4'):
+			return match.group('neighbor_v4').lower()
+		else:
+			return address.IPv6tohex(match.group('neighbor_v6'))
 
 	def parse (self,stream):
 		neighbors = {}
@@ -81,7 +88,7 @@ class Cisco (object):
 			if not in_interface and not in_bgp and not family_version:
 				match = self.expr_interface.search(line)
 				if match:
-					last_interface = match.group('interface')+match.group('number')
+					last_interface = match.group('interface').lower()+match.group('number').lower()
 					in_interface = True
 					continue
 				match = self.expr_router_bgp.search(line)
@@ -103,14 +110,21 @@ class Cisco (object):
 					continue
 				match = self.expr_ipv4.search(line)
 				if match:
-					interface_netmask[match.group('ip')] = match.group('netmask')
 					interface_ipv4[last_interface] = match.group('ip')
+					interface_netmask[match.group('ip')] = match.group('netmask')
 					network[address.IPv4NetworkNetmask(match.group('ip'),match.group('netmask'))] = match.group('ip')
 					continue
 				match = self.expr_ipv6.search(line)
 				if match:
-					interface_netmask[match.group('ip')] = match.group('netmask')
-					interface_ipv6[last_interface] = match.group('ip')
+					v6 = address.IPv6tohex(match.group('ip'))
+					n = int(match.group('netmask'))
+					n6 = n/4
+					if n6*4 != n:
+						print >> sys.stderr, 'can only deal with ipv6 netmask 4bits aligned (ie: matching a letter of the IP)'
+						sys.exit(1)
+					interface_netmask[v6] = n
+					interface_ipv6[last_interface] = v6
+					network[v6[:n6]] = v6
 					continue
 				continue
 			
@@ -121,22 +135,22 @@ class Cisco (object):
 
 				match = self.expr_any_neighbor.search(line)
 				if match:
-					neighbors[match.group('neighbor')] = True
+					neighbors[self._neighbor(match)] = True
 
 				# not sure this can match anything
 				match = self.expr_no_neighbor_ipv4.search(line)
 				if match:
-					ignore.append(match.group('neighbor'))
+					ignore.append(match.group('neighbor').lower())
 					continue
 				# not sure this can match anything
 				match = self.expr_no_neighbor_ipv6.search(line)
 				if match:
-					ignore.append(match.group('neighbor'))
+					ignore.append(address.IPv6tohex(match.group('neighbor')))
 					continue
 
 				match = self.expr_neighbor_remote_asn.search(line)
 				if match:
-					remote_asn[match.group('neighbor')] = match.group('asn')
+					remote_asn[self._neighbor(match)] = match.group('asn')
 					continue
 				
 				# must follow expr_neighbor_remote_asn for when it fails
@@ -146,27 +160,27 @@ class Cisco (object):
 
 				match = self.expr_group_update_source.search(line)
 				if match:
-					group_interface[match.group('peer_group')] = match.group('interface')+match.group('number')
+					group_interface[match.group('peer_group')] = match.group('interface').lower()+match.group('number').lower()
 
 				# must be before other peer group search
 				match = self.expr_peer_group.search(line)
 				if match:
-					peer_group[match.group('peer_group')] = match.group('name')
+					peer_group[self._neighbor(match)] = match.group('peer_group')
 					# do *not* insert an continue here ..
 
 				match = self.expr_peer.search(line)
 				if match:
-					peer_type[match.group('neighbor')] = 'peer'
+					peer_type[self._neighbor(match)] = 'peer'
 					continue
 
 				match = self.expr_customer.search(line)
 				if match:
-					peer_type[match.group('neighbor')] = 'customer'
+					peer_type[self._neighbor(match)] = 'customer'
 					continue
 
 				match = self.expr_transit.search(line)
 				if match:
-					peer_type[match.group('neighbor')] = 'transit'
+					peer_type[self._neighbor(match)] = 'transit'
 					continue
 
 				match = self.expr_descr.search(line)
@@ -176,7 +190,7 @@ class Cisco (object):
 					mail = matched.get('peer_email','')
 					announce = matched.get('peer_announced_asset','')
 					macro = matched.get('peer_accepted_asset','')
-					descr[matched.get('neighbor')] = macro,name,mail,announce
+					descr[self._neighbor(match)] = macro,name,mail,announce
 					continue
 				continue
 
@@ -187,17 +201,17 @@ class Cisco (object):
 				
 				match = self.expr_any_neighbor.search(line)
 				if match:
-					neighbors[match.group('neighbor')] = True
+					neighbors[self._neighbor(match)] = True
 					
 				if family_version == 6:
 					match = self.expr_no_neighbor_ipv6.search(line)
 					if match:
-						ignore.append(match.group('neighbor'))
+						ignore.append(address.IPv6tohex(match.group('neighbor')))
 					continue
 				if family_version == 4:
 					match = self.expr_no_neighbor_ipv4.search(line)
 					if match:
-						ignore.append(match.group('neighbor'))
+						ignore.append(match.group('neighbor').lower())
 						continue
 					continue
 				continue
@@ -206,7 +220,7 @@ class Cisco (object):
 			print >> sys.stderr, 'can not extract router name'
 			sys.exit(1)
 
-		debug = False
+		debug = True
 
 		for dest in neighbors.keys():
 			if dest in ignore:
@@ -259,8 +273,15 @@ class Cisco (object):
 							continue
 				else:
 					src = '::'
+					d = address.IPv6tohex(dest)
+					for r in range(0,28):
+						k = d[:r]
+						if network.has_key(k):
+							src = address.hextoIPv6(network[k])
+							dest = address.hextoIPv6(dest)
+							break
 
-			if type == 'peer' and macro != '' and dest != '' and src != '':
+			if type == 'customer' and macro != '' and dest != '' and src != '':
 				if announce == '': announce = self.announced_set
 				export = type
 			elif type == 'transit' and dest != '' and src != '' and macro == 'ANY':
@@ -276,5 +297,5 @@ class Cisco (object):
 				export = type
 			else:
 				export = 'error ' + type
-				
+			
 			yield "%s|%s|%s|%s|%s|%s|%s|%s|%s|%s" % (router,export,group,asn,announce,src,dest,macro,mail,name)
