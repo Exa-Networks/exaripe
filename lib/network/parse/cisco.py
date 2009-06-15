@@ -19,7 +19,9 @@ class Cisco (object):
 
 	expr_interface = re.compile('^\s*interface\s+%s\s*$' % regex_interface)
 	expr_bgp_family = re.compile('^\s*address-family ipv(?P<family>4|6)\s*$')
+
 	expr_exit = re.compile('^\s*!\s*')
+	expr_exit_family = re.compile('^\s*exit-address-family\s*')
 
 	expr_ipv4 = re.compile('\s*ip\s+address\s+(?P<ip>%s)\s+(?P<netmask>%s)\s*' % (regex_ipv4,regex_ipv4))
 	expr_ipv6 = re.compile('\s*ipv6\s+address\s+(?P<ip>%s)\s*/\s*(?P<netmask>12[0-8]|1[01]\d|\d{2}|\d)\s*' % regex_ipv6)
@@ -195,7 +197,8 @@ class Cisco (object):
 				continue
 
 			if family_version:
-				if self.expr_exit.search(line):
+				#if self.expr_exit.search(line):
+				if self.expr_exit_family.search(line):
 					family_version = False
 					continue
 				
