@@ -6,6 +6,8 @@ from network import address
 # TODO: should list all the peers and find the ones we have no description for to report them
 
 class Cisco (object):
+	debug = False
+
 	invalid_peer = ['something-unique-the-regex-will-not-match-for-peer']
 	invalid_transit = ['something-unique-the-regex-will-not-match-for-transit']
 	invalid_customer = ['something-unique-the-regex-will-not-match-for-customer']
@@ -223,19 +225,17 @@ class Cisco (object):
 			print >> sys.stderr, 'can not extract router name'
 			sys.exit(1)
 
-		debug = True
-
 		for dest in neighbors.keys():
 			if dest in ignore:
-				if debug:print 'de-activated peer', dest
+				if self.debug:print 'de-activated peer', dest
 				continue
 			
 			if dest not in descr:
-				if debug: print 'missing description for', dest
+				if self.debug: print 'missing description for', dest
 				continue
 
 			if dest not in peer_group:
-				if debug: print 'no peer group for', dest
+				if self.debug: print 'no peer group for', dest
 				continue
 
 			group = peer_group[dest]
@@ -244,7 +244,7 @@ class Cisco (object):
 				if group in group_asn and group_asn[group] == self.asn:
 					type = 'ibgp'
 				else:
-					if debug: print 'can not find type of peer connection for', dest
+					if self.debug: print 'can not find type of peer connection for', dest
 					continue
 			else:
 				type = peer_type[dest]
@@ -256,7 +256,7 @@ class Cisco (object):
 			elif group in group_asn:
 				asn = group_asn[group]
 			else:
-				if debug: print "no asn information for", dest
+				if self.debug: print "no asn information for", dest
 				continue
 
 			try:
