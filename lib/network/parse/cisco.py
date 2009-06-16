@@ -6,8 +6,6 @@ from network import address
 # TODO: should list all the peers and find the ones we have no description for to report them
 
 class Cisco (object):
-	debug = False
-
 	invalid_peer = ['something-unique-the-regex-will-not-match-for-peer']
 	invalid_transit = ['something-unique-the-regex-will-not-match-for-transit']
 	invalid_customer = ['something-unique-the-regex-will-not-match-for-customer']
@@ -55,8 +53,6 @@ class Cisco (object):
 		self.expr_customer = re.compile('\s*neighbor\s+(?P<neighbor>(?P<neighbor_v4>%s)|(?P<neighbor_v6>%s))\s+peer-group\s+(?P<peer_group>%s)\s*' % (self.regex_ipv4,self.regex_ipv6,'|'.join(customer)))
 
 		self.expr_descr = re.compile('\s*neighbor\s+(?P<neighbor>(?P<neighbor_v4>%s)|(?P<neighbor_v6>%s))\s+description\s+%s\s*' % (self.regex_ipv4,self.regex_ipv6,regex))
-
-		#print '\s*neighbor (?P<neighbor>%s|%s)\s+description\s+%s\s*' % (self.regex_ipv4,self.regex_ipv6,regex)
 
 	def _neighbor (self,match):
 		if match.group('neighbor_v4'):
@@ -227,15 +223,15 @@ class Cisco (object):
 
 		for dest in neighbors.keys():
 			if dest in ignore:
-				if self.debug:print 'de-activated peer', dest
+				#print >> sys.stderr, 'de-activated peer', dest
 				continue
 			
 			if dest not in descr:
-				if self.debug: print 'missing description for', dest
+				print >> sys.stderr, 'missing description for', dest
 				continue
 
 			if dest not in peer_group:
-				if self.debug: print 'no peer group for', dest
+				print >> sys.stderr, 'no peer group for', dest
 				continue
 
 			group = peer_group[dest]
@@ -244,7 +240,7 @@ class Cisco (object):
 				if group in group_asn and group_asn[group] == self.asn:
 					type = 'ibgp'
 				else:
-					if self.debug: print 'can not find type of peer connection for', dest
+					print >> sys.stderr, 'can not find type of peer connection for', dest
 					continue
 			else:
 				type = peer_type[dest]
@@ -256,7 +252,7 @@ class Cisco (object):
 			elif group in group_asn:
 				asn = group_asn[group]
 			else:
-				if self.debug: print "no asn information for", dest
+				print >> sys.stderr, 'no asn information for', dest
 				continue
 
 			try:
