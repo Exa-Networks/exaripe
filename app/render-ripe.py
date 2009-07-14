@@ -37,30 +37,30 @@ xslt = os.path.join(os.environ.get('ETC','/etc'),'render','allocation.xsl')
 javascript = os.path.join(os.environ.get('ETC','/etc'),'render','allocation.js')
 
 if not os.path.exists(location):
-	print >> sys.stderr, "destination folder does not exists"
+	print "destination folder does not exists"
 	sys.exit(1)
 
 if not os.path.isdir(location):
-	print >> sys.stderr, "destination is not a directory"
+	print "destination is not a directory"
 	sys.exit(1)
 
 from render.ripe import Whois
 whois = Whois(option['allocation'])
 
-print >> sys.stderr, "copying javascript"
+print "copying javascript"
 with open(javascript) as r:
 	with open(os.path.join(location,'allocation.js'),'w+') as w:
 		content = r.read()
 		w.write(content)
 
-print >> sys.stderr, "generating png"
+print "generating png"
 from render.image import Image
 image = Image(option['allocation'],
 		option['top'],option['left'],option['right'],
 		6,20,4)
 image.generate(whois.rpsl,location,'image.png')
 
-print >> sys.stderr, "generating html"
+print "generating html"
 from render.html import HTML
 html = HTML(xslt,image)
 html.generate(whois.rpsl,location,'index.html')
