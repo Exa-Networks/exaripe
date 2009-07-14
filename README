@@ -1,0 +1,10 @@
+The RIPE HTML display program is based of Theo Zourzouvillys perl code
+which can be found at:
+	http://crazygreek.co.uk/content/ripe
+
+The RIPE HTML display requires the following extra python packages:
+	netaddr and lxml
+
+They can be installed on debian/ubuntu with:
+	apt-get install python-netaddr
+	apt-get install python-lxml
