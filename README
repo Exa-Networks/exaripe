@@ -3,8 +3,9 @@ which can be found at:
 	http://crazygreek.co.uk/content/ripe
 
 The RIPE HTML display requires the following extra python packages:
-	netaddr and lxml
+	netaddr, gd and lxml
 
-They can be installed on debian/ubuntu with:
+They can be installed on a recent (2009) debian/ubuntu with:
 	apt-get install python-netaddr
 	apt-get install python-lxml
+	apt-get install python-gd
