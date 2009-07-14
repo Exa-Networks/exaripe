@@ -19,8 +19,7 @@ class HTML (object):
 
 		prefixes = etree.Element ('prefixes',attributes)
 
-		errors = ['there was no error','really none']
-		for error in errors:
+		for error in rpsl.errors:
 			etree.SubElement(prefixes,'error').text = error
 
 		id = 0

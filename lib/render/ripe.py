@@ -16,6 +16,7 @@ class RPSL (object):
 		self.inetnum = {}
 		self.key = ''
 		self.data = ''
+		self.errors = []
 
 	def dataReceived (self,data):
 		self.data += data
