@@ -14,6 +14,7 @@ class Options(usage.Options):
 		["png",   "p", "generate png"],
 		["html",  "h", "generate html"],
 		["debug", "d", "turn debugging on"],
+		["svg",   "s", "turn on experimental SVG support"],
 	]
 	optParameters = [
 		["location",   "l", "/var/www",      "Where the result should be writen"],
@@ -31,9 +32,11 @@ except usage.UsageError, errortext:
     print '%s: Try --help for usage details.' % (sys.argv[0])
     sys.exit(1)
 
+svg = option.get('svg',False)
+rendering = 'svg' if svg else 'image'
 
 location = option['location']
-xslt = os.path.join(os.environ.get('ETC','/etc'),'render','allocation.xsl')
+xslt = os.path.join(os.environ.get('ETC','/etc'),'render','allocation-%s.xsl' % rendering)
 javascript = os.path.join(os.environ.get('ETC','/etc'),'render','allocation.js')
 
 if not os.path.exists(location):
@@ -53,16 +56,21 @@ with open(javascript) as r:
 		content = r.read()
 		w.write(content)
 
-print "generating png"
-from render.image import Image
-image = Image(option['allocation'],
+if svg:
+	print "generating svg"
+	from render.svg import SVG as Map
+else:
+	print "generating png"
+	from render.image import Image as Map
+
+map = Map(option['allocation'],
 		option['top'],option['left'],option['right'],
-		6,20,4)
-image.generate(whois.rpsl,location,'image.png')
+		20,4)
+map.generate(whois.rpsl,location,'image')
 
 print "generating html"
 from render.html import HTML
-html = HTML(xslt,image)
+html = HTML(xslt,map)
 html.generate(whois.rpsl,location,'index.html')
 
 sys.exit(0)

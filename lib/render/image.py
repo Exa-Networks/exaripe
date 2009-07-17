@@ -3,22 +3,28 @@ import gd
 from netaddr import CIDR,nrange
 
 class Image (object):
-	def __init__ (self,allocation,top,left,right,font,height,weight):
+	def __init__ (self,allocation,top,left,right,size_y,size_x):
 		self.allocation = allocation
 		self.left = left
 		self.right = right
 		self.top = top
 
-		self.font = font
-		self.height = height
-		self.weight = weight
-		self.length = weight*256
+		self.font = 6
+		self.size_y = size_y
+		self.size_x = size_x
+		self.length = size_x*256
 
 		self.location = {}
+
 		self.name = ''
-		
+		self.width = 0
+		self.height = 0
+
 	def generate (self,rpsl,prefix,name):
-		self.name = name
+		self.name = '%s.png' % name
+		self.width = 1050 + self.left
+		self.height = (rpsl.nb24s*self.size_y) + self.top + 1 + 100
+ 
 		cidr = CIDR(self.allocation)
 
 		per24 = rpsl.fragment()
@@ -27,7 +33,7 @@ class Image (object):
 		for s in xrange(24,32+1):
 			slash[pow(2,32-s)] = s
 
-		image = gd.image((1050 + self.left, (rpsl.nb24s*self.height) + self.top + 1 + 100))
+		image = gd.image((self.width,self.height))
 		
 		color = {
 			'white' : image.colorAllocate((255, 255, 255)),
@@ -59,7 +65,7 @@ class Image (object):
 		gd.gdMaxColors = 256 * 256 * 256
 		
 		# The outer box
-		image.rectangle((self.left,self.top),(self.left+self.length,self.top+(rpsl.nb24s*self.height)),color['black'])
+		image.rectangle((self.left,self.top),(self.left+self.length,self.top+(rpsl.nb24s*self.size_y)),color['black'])
 		
 		# The color legend
 		keys = background.keys()
@@ -80,15 +86,15 @@ class Image (object):
 			t = y + 3
 			image.line((self.left,y),(self.left+self.length,y),color['black'])
 			image.string(gd.gdFontSmall, (self.left - (self.font * len(range)) - self.font/2, t), range, color['black'])
-			y+=self.height
+			y+=self.size_y
 		
 		image.setStyle((color['black'],color['black'],color['black'],gd.gdTransparent,gd.gdTransparent,gd.gdTransparent))
 		
 		# The horizontal numbering
 		yt = self.top - 12
-		yb = self.top + rpsl.nb24s*self.height
+		yb = self.top + rpsl.nb24s*self.size_y
 		for n in xrange(0,256,16):
-			x = self.left+(n*self.weight)
+			x = self.left+(n*self.size_x)
 			image.line((x,yt),(x,yb),gd.gdStyled)
 			image.stringUp(gd.gdFontSmall,(x,yt),str(n),color['black'])
 		
@@ -96,7 +102,7 @@ class Image (object):
 		# Each inetnum
 		v = 0
 		for row in nrange(cidr[0],cidr[-1],256):
-			y = self.top + (v*self.height)
+			y = self.top + (v*self.size_y)
 			for range in per24.get(row,[]):
 				start = tuple(range)[-1]
 				size = rpsl.inetnum[range]['length']
@@ -107,36 +113,36 @@ class Image (object):
 				while wrap:
 					wrap = True if start + size > 256 else False
 					if wrap:
-						xl = self.left + (start*self.weight)
-						xr = self.left + (256*self.weight)
+						xl = self.left + (start*self.size_x)
+						xr = self.left + (256*self.size_x)
 						incr = (256 - start)
 						size -= incr
 						start = 0
 					else:
-						xl = self.left + (start*self.weight)
-						xr = xl + (size*self.weight)
+						xl = self.left + (start*self.size_x)
+						xr = xl + (size*self.size_x)
 						incr = size
 
-					image.rectangle((xl,y),(xr,y+self.height),color['black'])
+					image.rectangle((xl,y),(xr,y+self.size_y),color['black'])
 					try:
-						image.filledRectangle((xl+1,y+1),(xr-1,y+self.height-1),background[slash[incr]])
+						image.filledRectangle((xl+1,y+1),(xr-1,y+self.size_y-1),background[slash[incr]])
 					except KeyError:
-						image.filledRectangle((xl+1,y+1),(xr-1,y+self.height-1),color['grey'])
+						image.filledRectangle((xl+1,y+1),(xr-1,y+self.size_y-1),color['grey'])
 					if remarks == 'INFRA-AW':
-						image.rectangle((xl+1,y+1),(xr-1,y+self.height-1),color['red'])
-						image.rectangle((xl+2,y+2),(xr-2,y+self.height-2),color['red'])
+						image.rectangle((xl+1,y+1),(xr-1,y+self.size_y-1),color['red'])
+						image.rectangle((xl+2,y+2),(xr-2,y+self.size_y-2),color['red'])
 					if len(descr) * self.font > (xr-xl) - 6:
 						descr = descr[:(xr-xl)/self.font -2] + '..'
 					image.string(gd.gdFontSmall,(xl+4,y+3),descr,color['black'])
 
 					try:
-						self.location[range].append(((xl+1,y+1),(xr-1,y+self.height-1)))
+						self.location[range].append(((xl+1,y+1),(xr-1,y+self.size_y-1)))
 					except KeyError:
-						self.location[range] = [((xl+1,y+1),(xr-1,y+self.height-1))]
+						self.location[range] = [((xl+1,y+1),(xr-1,y+self.size_y-1))]
 
 					if wrap:
-						y += self.height
+						y += self.size_y
 			v += 1
 		
-		image.writePng(os.path.join(prefix,name))
+		image.writePng(os.path.join(prefix,self.name))
 		

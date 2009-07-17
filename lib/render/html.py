@@ -4,13 +4,16 @@ import os
 from lxml import etree
 
 class HTML (object):
-	def __init__ (self,template,image):
+	def __init__ (self,template,map):
 		self.template = template
-		self.image = image
+		self.map = map
 
 	def generate (self,rpsl,location,output):
 		attributes = {
-			'image' : self.image.name,
+			'svg'   : self.map.name,
+			'image' : self.map.name,
+			'width' : str(self.map.width),
+			'height': str(self.map.height),
 			'range' : str(rpsl.range),
 		}
 
@@ -25,7 +28,7 @@ class HTML (object):
 		id = 0
 		for range in rpsl.inetnum.keys():
 			data = rpsl.inetnum[range]
-			for ((xl,yl),(xr,yr)) in self.image.location[range]:
+			for ((xl,yl),(xr,yr)) in self.map.location[range]:
 				prefix = etree.Element ('prefix')
 
 				prefix.set('id',str(id))
