@@ -10,4 +10,4 @@ else
 	cd - > /dev/null
 fi
 
-env PYTHONPATH=$path/lib:$path/../lib ETC=$path/etc $path/app/`basename $0`.py $@
+env PYTHONPATH=$path/lib:$path/../lib ETC=$path/etc $path/prg/`basename $0`.py $@
