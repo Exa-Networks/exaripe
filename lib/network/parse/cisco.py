@@ -6,6 +6,7 @@ from network import address
 # TODO: should list all the peers and find the ones we have no description for to report them
 
 class Cisco (object):
+	cast = {None:'unicast','multicast':'multicast'}
 	invalid_peer = ['something-unique-the-regex-will-not-match-for-peer']
 	invalid_transit = ['something-unique-the-regex-will-not-match-for-transit']
 	invalid_customer = ['something-unique-the-regex-will-not-match-for-customer']
@@ -18,7 +19,7 @@ class Cisco (object):
 	expr_hostname = re.compile('^\s*hostname\s+(?P<router>.*)\s*$')
 
 	expr_interface = re.compile('^\s*interface\s+%s\s*$' % regex_interface)
-	expr_bgp_family = re.compile('^\s*address-family ipv(?P<family>4|6)\s*$')
+	expr_bgp_family = re.compile('^\s*address-family ipv(?P<family>4|6)\s*(?P<cast>multicast)?$')
 
 	expr_exit = re.compile('^\s*!\s*')
 	expr_exit_family = re.compile('^\s*exit-address-family\s*')
@@ -98,6 +99,7 @@ class Cisco (object):
 				match = self.expr_bgp_family.search(line)
 				if match:
 					family_version = match.group('family')
+					family_cast = self.cast[match.group('cast')]
 					continue
 				match = self.expr_hostname.search(line)
 				if match:
@@ -198,6 +200,7 @@ class Cisco (object):
 				#if self.expr_exit.search(line):
 				if self.expr_exit_family.search(line):
 					family_version = False
+					expr_exit_family = 'unicast'
 					continue
 				
 				match = self.expr_any_neighbor.search(line)
