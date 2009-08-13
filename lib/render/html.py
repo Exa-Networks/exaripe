@@ -10,8 +10,8 @@ class HTML (object):
 
 	def generate (self,rpsl,destination):
 		attributes = {
-			'svg'   : self.map.name,
-			'image' : self.map.name,
+			'svg'   : self.map.link,
+			'image' : self.map.link,
 			'width' : str(self.map.width),
 			'height': str(self.map.height),
 			'range' : str(rpsl.range),

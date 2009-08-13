@@ -4,8 +4,9 @@ from netaddr import CIDR,nrange
 
 class SVG (object):
 
-	def __init__ (self,allocation,top,left,right,size_y,size_x):
+	def __init__ (self,allocation,prefix,top,left,right,size_y,size_x):
 		self.allocation = allocation
+		self.prefix = prefix
 		self.left = left
 		self.right = right
 		self.top = top
@@ -47,8 +48,9 @@ class SVG (object):
 </text>
 """ % (x,y,str(color),string)
 
-	def generate (self,rpsl,prefix,name):
-		self.name = '%s.svg' % name
+	def generate (self,rpsl,dir,name):
+		self.name = os.path.join(dir,name)
+		self.link = os.path.join(self.prefix,name)
 		self.width = 1050 + self.left
 		self.height = (rpsl.nb24s*self.size_y) + self.top + 1 + 100
 
@@ -174,6 +176,6 @@ class SVG (object):
 						y += self.size_y
 			v += 1
 		
-		with open(os.path.join(prefix,self.name),'w+') as w:
+		with open(self.name,'w+') as w:
 			w.write(svg % content)
 		

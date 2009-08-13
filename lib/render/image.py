@@ -3,8 +3,9 @@ import gd
 from netaddr import CIDR,nrange
 
 class Image (object):
-	def __init__ (self,allocation,top,left,right,size_y,size_x):
+	def __init__ (self,allocation,prefix,top,left,right,size_y,size_x):
 		self.allocation = allocation
+		self.prefix = prefix
 		self.left = left
 		self.right = right
 		self.top = top
@@ -20,8 +21,9 @@ class Image (object):
 		self.width = 0
 		self.height = 0
 
-	def generate (self,rpsl,prefix,name):
-		self.name = '%s.png' % name
+	def generate (self,rpsl,dir,name):
+		self.name = os.path.join(dir,name)
+		self.link = os.path.join(self.prefix,name)
 		self.width = 1050 + self.left
 		self.height = (rpsl.nb24s*self.size_y) + self.top + 1 + 100
  
@@ -144,5 +146,5 @@ class Image (object):
 						y += self.size_y
 			v += 1
 		
-		image.writePng(os.path.join(prefix,self.name))
+		image.writePng(self.name)
 		
