@@ -1,0 +1,32 @@
+# Allow the ripe display page to be accessed at : http://site.com/cgi/ripe
+
+<VirtualHost *:80>
+        ServerName      site.com
+        DocumentRoot    /var/www/html/
+        Options +Indexes FollowSymLinks MultiViews
+
+        CustomLog /var/log/apache2/site.access.log combined
+
+        ScriptAlias     /cgi/           /opt/network/cgi/
+        Alias           /images/        /opt/network/cache/
+
+        <Directory /opt/network/cache>
+                Options -Indexes -FollowSymLinks
+                AllowOverride None
+        </Directory>
+
+        <Directory /opt/network/cgi>
+                Options -Indexes +ExecCGI
+                AllowOverride None
+                AddHandler cgi-script cgi py
+        </Directory>
+
+        <Directory /var/www/html/>
+                Options +FollowSymLinks
+                AllowOverride All
+                order allow,deny
+                allow from all
+        </Directory>
+</VirtualHost>
+
+
