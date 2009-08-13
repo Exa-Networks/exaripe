@@ -37,7 +37,6 @@ rendering = 'svg' if svg else 'image'
 
 location = option['location']
 xslt = os.path.join(os.environ.get('ETC','/etc'),'render','allocation-%s.xsl' % rendering)
-javascript = os.path.join(os.environ.get('ETC','/etc'),'render','allocation.js')
 
 if not os.path.exists(location):
 	print "destination folder does not exists"
@@ -49,12 +48,6 @@ if not os.path.isdir(location):
 
 from render.ripe import Whois
 whois = Whois(option['allocation'])
-
-print "copying javascript"
-with open(javascript) as r:
-	with open(os.path.join(location,'allocation.js'),'w+') as w:
-		content = r.read()
-		w.write(content)
 
 if svg:
 	print "generating svg"
@@ -71,7 +64,8 @@ map.generate(whois.rpsl,location,'image')
 print "generating html"
 from render.html import HTML
 html = HTML(xslt,map)
-html.generate(whois.rpsl,location,'index.html')
+with open(os.path.join(location,'index.html'),'w+') as f:
+	html.generate(whois.rpsl,f)
 
 sys.exit(0)
 

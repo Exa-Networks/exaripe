@@ -8,7 +8,7 @@ class HTML (object):
 		self.template = template
 		self.map = map
 
-	def generate (self,rpsl,location,output):
+	def generate (self,rpsl,destination):
 		attributes = {
 			'svg'   : self.map.name,
 			'image' : self.map.name,
@@ -48,6 +48,5 @@ class HTML (object):
 				prefixes.append(prefix)
 				id += 1
 
-		with open(os.path.join(location,output),'w+') as f:
-			f.write(etree.tostring(style.apply(prefixes)))
+		destination.write(etree.tostring(style.apply(prefixes)))
 
