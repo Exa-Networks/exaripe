@@ -163,7 +163,8 @@ class SVG (object):
 					content += self._rectangle(xl,y,xs,self.size_y,border,back)
 
 					if len(descr) * self.font > (xr-xl) - 6:
-						descr = descr[:(xr-xl)/self.font -2] + '..'
+						last = max(0,(xr-xl)/self.font -2)
+						descr = descr[:last] + '..' if last else ''
 
 					content += self._text(xl+4,y+14,self.font,color['black'],descr)
 

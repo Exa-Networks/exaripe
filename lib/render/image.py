@@ -134,7 +134,8 @@ class Image (object):
 						image.rectangle((xl+1,y+1),(xr-1,y+self.size_y-1),color['red'])
 						image.rectangle((xl+2,y+2),(xr-2,y+self.size_y-2),color['red'])
 					if len(descr) * self.font > (xr-xl) - 6:
-						descr = descr[:(xr-xl)/self.font -2] + '..'
+						last = max(0,(xr-xl)/self.font -2)
+						descr = descr[:last] + '..' if last else ''
 					image.string(gd.gdFontSmall,(xl+4,y+3),descr,color['black'])
 
 					try:
