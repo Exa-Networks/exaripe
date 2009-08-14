@@ -74,7 +74,11 @@ xslt   = os.path.join(dir,'etc','render','allocation-%s.xsl' % rendering)
 img    = "%s.%s" % (allocation.replace('/','-'),ext)
 
 from render.ripe import Whois
-whois = Whois(allocation)
+try:
+	whois = Whois(allocation)
+except ValueError,e:
+	print str(e)
+	home()
 
 if svg:	from render.svg import SVG as Map
 else:	from render.image import Image as Map
