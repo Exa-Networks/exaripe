@@ -3,6 +3,7 @@
 debug = True
 svg = False
 store = "/images"
+allocation = "195.66.224.0/19"
 
 import sys
 import os
@@ -13,7 +14,7 @@ if debug:
 	import cgitb
 	cgitb.enable()
 
-def home ():
+def home (allocation):
 	print """\
 <html>
 <head>
@@ -25,7 +26,7 @@ def home ():
 	<br/>
 	<form name="range" action="ripe" method="get">
 		Range : 
-		<input type="text" name="allocation" size="30" value="195.66.224.0/19" />
+		<input type="text" name="allocation" size="30" value="%s" />
 		<input type="submit" value="Submit" />
 		<br />
 		Rendering :
@@ -36,7 +37,7 @@ def home ():
 	</form>
 	<br/>
 	Find the original perl version at: <a href="http://crazygreek.co.uk/content/ripe">http://crazygreek.co.uk/content/ripe</a>
-</body>"""
+</body>""" % allocation
 	sys.exit(0)
 
 def validate_allocation (allocation):
@@ -66,23 +67,23 @@ print ""
 if not os.path.exists(cache):
 	print "destination folder does not exists"
 	if debug: print cache
-	home()
+	home(allocation)
 
 form = cgi.FieldStorage()
 
 if not form.has_key('allocation'):
-	home()
-
-if not form.has_key('rendering'):
-	home()
+	home(allocation)
 
 allocation = form.getfirst('allocation')
 if not validate_allocation(allocation):
-	home()
+	home(allocation)
+
+if not form.has_key('rendering'):
+	home(allocation)
 
 rendering = form.getfirst('rendering')
 if not validate_rendering(rendering):
-	home()
+	home(allocation)
 
 xslt   = os.path.join(dir,'etc','render','allocation-%s.xsl' % rendering)
 img    = "%s.%s" % (allocation.replace('/','-'),rendering)
@@ -92,7 +93,7 @@ try:
 	whois = Whois(allocation)
 except ValueError,e:
 	print str(e)
-	home()
+	home(allocation)
 
 if rendering == 'svg':
 	from render.svg import SVG as Image
