@@ -12,9 +12,8 @@
             display: none;
           }
         </style>
-        <script language="JavaScript">
-<![CDATA[
-function showPrefix(t,id) {
+        <script language="JavaScript"><![CDATA[
+function showPrefix(id) {
   elt = document.getElementById(id);
   var loc = document.getElementById("loc");
   loc.innerHTML = elt.innerHTML;
@@ -27,7 +26,7 @@ function hidePrefix() {
   loc.style.display = "none";
 }
 
-function showPrefixAlert(t,id) {
+function showPrefixAlert(id) {
   elt = document.getElementById(id);
   if (elt == undefined)
     return;
@@ -41,8 +40,7 @@ function showPrefixAlert(t,id) {
   }
   alert(txt);
 }
-]]>
-        </script>
+]]></script>
         <title>RIR - Network Graph</title>
       </head>
       <body>
@@ -54,14 +52,14 @@ function showPrefixAlert(t,id) {
         <map name="map">
           <xsl:for-each select="/prefixes/prefix">
             <area shape="rect" coords="{@xl},{@yl},{@xr},{@yr}" title="[{@netname}] {description/text()}"
-             onMouseOver="showPrefix(this, 'a{@id}')"
+             onMouseOver="showPrefix('a{@id}')"
              onMouseOut="hidePrefix()"
-             onClick="showPrefixAlert(this, 'a{@id}')"
+             onClick="showPrefixAlert('a{@id}')"
           />
           </xsl:for-each>
         </map>
         <div id="loc"/>
-        <br/><br/><br/><br/><br/><br/><br/><br/><br/>
+        <br/><br/>
         <xsl:for-each select="/prefixes/prefix">
           <div class="cap" id="a{@id}">
             <h3><xsl:value-of select="@netname"/></h3>

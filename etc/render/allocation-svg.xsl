@@ -12,9 +12,8 @@
             display: none;
           }
         </style>
-        <script language="JavaScript">
-<![CDATA[
-function showPrefix(t,id) {
+        <script type="text/javascript"><![CDATA[
+function showPrefix(id) {
   elt = document.getElementById(id);
   var loc = document.getElementById("loc");
   loc.innerHTML = elt.innerHTML;
@@ -27,7 +26,7 @@ function hidePrefix() {
   loc.style.display = "none";
 }
 
-function showPrefixAlert(t,id) {
+function showPrefixAlert(id) {
   elt = document.getElementById(id);
   if (elt == undefined)
     return;
@@ -41,8 +40,7 @@ function showPrefixAlert(t,id) {
   }
   alert(txt);
 }
-]]>
-        </script>
+]]></script>
         <title>RIR - Network Graph</title>
       </head>
       <body>
@@ -50,18 +48,9 @@ function showPrefixAlert(t,id) {
         <xsl:for-each select="/prefixes/error">
           <li><b class="color:red"><xsl:value-of select="text()"/></b></li>
         </xsl:for-each>
-        <embed src="{/prefixes/@svg}" width="{/prefixes/@width}" height="{/prefixes/@height}" usemap="#map" type="image/svg+xml" pluginspage="http://www.adobe.com/svg/viewer/install/" />
-        <map name="map">
-          <xsl:for-each select="/prefixes/prefix">
-            <area shape="rect" coords="{@xl},{@yl},{@xr},{@yr}" title="[{@netname}] {description/text()}"
-             onMouseOver="showPrefix(this, 'a{@id}')"
-             onMouseOut="hidePrefix()"
-             onClick="showPrefixAlert(this, 'a{@id}')"
-          />
-          </xsl:for-each>
-        </map>
+        <embed src="{/prefixes/@svg}" width="{/prefixes/@width}" height="{/prefixes/@height}" type="image/svg+xml" pluginspage="http://www.adobe.com/svg/viewer/install/" />
         <div id="loc"/>
-        <br/><br/><br/><br/><br/><br/><br/><br/><br/>
+        <br/><br/>
         <xsl:for-each select="/prefixes/prefix">
           <div class="cap" id="a{@id}">
             <h3><xsl:value-of select="@netname"/></h3>

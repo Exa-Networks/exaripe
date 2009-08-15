@@ -96,9 +96,10 @@ except ValueError,e:
 
 if rendering == 'svg':
 	from render.svg import SVG as Map
+	map = Map(allocation,store,75,75,105,20,4,True)
 if rendering == 'png':
 	from render.image import Image as Map
-map = Map(allocation,store,75,75,105,20,4)
+	map = Map(allocation,store,75,75,105,20,4)
 
 from render.html import HTML
 html = HTML(xslt,map)

@@ -3,13 +3,13 @@ import os
 from netaddr import CIDR,nrange
 
 class SVG (object):
-
-	def __init__ (self,allocation,prefix,top,left,right,size_y,size_x):
+	def __init__ (self,allocation,prefix,top,left,right,size_y,size_x,js=False):
 		self.allocation = allocation
 		self.prefix = prefix
 		self.left = left
 		self.right = right
 		self.top = top
+		self.js = js
 
 		self.font = 6
 		self.size_y = size_y
@@ -25,10 +25,11 @@ class SVG (object):
 	def _svg (self,sx,sy):
 		return """\
 <?xml version="1.0" encoding="UTF-8"?>
-<svg width="%d" height="%d" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<svg width="%d" height="%d" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve">
 %%s
 </svg>
 """ % (sx,sy)
+#viewBox="0 0 130 200" 
 
 	def _line (self,x1,y1,x2,y2,color,stroke=False):
 		return """\
@@ -36,10 +37,10 @@ class SVG (object):
 """ % (x1,y1,x2,y2,str(color),' stroke-dasharray="3,2"' if stroke else '')
 
 #<rect x="%d" y="%d" width="%d" height="%d" style="fill:rgb%s;stroke-width:1;stroke:rgb%s"/>
-	def _rectangle (self,x,y,sx,sy,color_border=(0,0,0),color_fill=(255,255,255)):
+	def _rectangle (self,x,y,sx,sy,color_border=(0,0,0),color_fill=(255,255,255),javascript=None):
 		return"""\
-<rect x="%d" y="%d" width="%d" height="%d" fill="rgb%s" stroke-width="1" stroke="rgb%s"/>
-""" % (x,y,sx,sy,str(color_fill),str(color_border))
+<rect x="%d" y="%d" width="%d" height="%d" fill="rgb%s" stroke-width="1" stroke="rgb%s" %s/>
+""" % (x,y,sx,sy,str(color_fill),str(color_border),javascript if javascript else '')
 
 	def _text (self,x,y,font,color,string):
 		return """\
@@ -92,6 +93,48 @@ class SVG (object):
 		svg = self._svg(1050 + self.left, (rpsl.nb24s*self.size_y) + self.top + 1 + 100)
 		content = ''
 
+		if self.js:
+			content += '''
+<script type="text/javascript"><![CDATA[
+function listProperties(obj) {
+   var propList = "";
+   for(var propName in obj) {
+      if(typeof(obj[propName]) != "undefined") {
+         propList += (propName + ", ");
+      }
+   }
+   alert(propList);
+}
+function showPrefix(id) {
+  elt = document.getElementById(id);
+  var loc = document.getElementById("loc");
+  loc.innerHTML = elt.innerHTML;
+  loc.style.display = "block";
+}
+
+function hidePrefix() {
+  document.getElementById("loc").innerHTML = "";
+  var loc = document.getElementById("loc");
+  loc.style.display = "none";
+}
+
+function showPrefixAlert(id) {
+  elt = top.document.getElementById(id);
+  if (elt == undefined)
+    return;
+  var txt = "";
+  kids = elt.childNodes;
+  for (var i = 0; kids.length - i; i++) {
+    if (kids[i].innerHTML != "") {
+      txt += kids[i].innerHTML;
+      txt += "\\n";
+    }
+  }
+  alert(txt);
+}
+]]></script>
+'''
+
 		# The outer box
 		content += self._rectangle(self.left,self.top, self.length,rpsl.nb24s*self.size_y, color['black'],color['white'])
 
@@ -126,6 +169,8 @@ class SVG (object):
 	
 		# Each inetnum
 		v = 0
+		id = 0
+		javascript = ''
 		for row in nrange(cidr[0],cidr[-1],256):
 			y = self.top + (v*self.size_y)
 			for range in per24.get(row,[]):
@@ -160,7 +205,8 @@ class SVG (object):
 					except KeyError:
 						back = color['grey']
 
-					content += self._rectangle(xl,y,xs,self.size_y,border,back)
+					if self.js: javascript = '''onmouseover="showPrefix('a%(id)s')" onmouseout="hidePrefix()" onclick="showPrefixAlert('a%(id)s')"''' % {'id':id}
+					content += self._rectangle(xl,y,xs,self.size_y,border,back,javascript)
 
 					if len(descr) * self.font > (xr-xl) - 6:
 						last = max(0,(xr-xl)/self.font -2)
@@ -170,8 +216,10 @@ class SVG (object):
 
 					try:
 						self.location[range].append(((xl+1,y+1),(xr-1,y+self.size_y-1)))
+						id += 1
 					except KeyError:
 						self.location[range] = [((xl+1,y+1),(xr-1,y+self.size_y-1))]
+						id += 1
 
 					if wrap:
 						y += self.size_y
