@@ -2,7 +2,7 @@ import os
 import gd
 from netaddr import CIDR,nrange
 
-class Image (object):
+class PNG (object):
 	def __init__ (self,allocation,prefix,top,left,right,size_y,size_x):
 		self.allocation = allocation
 		self.prefix = prefix
@@ -25,7 +25,7 @@ class Image (object):
 		self.name = os.path.join(dir,name)
 		self.link = os.path.join(self.prefix,name)
 		self.width = 1050 + self.left
-		self.height = (rpsl.nb24s*self.size_y) + self.top + 1 + 100
+		self.height = (rpsl.nb24s*self.size_y) + self.top + 10
  
 		cidr = CIDR(self.allocation)
 

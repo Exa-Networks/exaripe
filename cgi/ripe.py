@@ -95,17 +95,17 @@ except ValueError,e:
 	home()
 
 if rendering == 'svg':
-	from render.svg import SVG as Map
-	map = Map(allocation,store,75,75,105,20,4,True)
+	from render.svg import SVG as Image
+	image = Image(allocation,store,75,75,105,20,4,True)
 if rendering == 'png':
-	from render.image import Image as Map
-	map = Map(allocation,store,75,75,105,20,4)
+	from render.png import PNG as Image
+	image = Image(allocation,store,75,75,105,20,4)
 
 from render.html import HTML
-html = HTML(xslt,map)
+html = HTML(xslt,image)
 
 try:
-	map.generate(whois.rpsl,cache,img)
+	image.generate(whois.rpsl,cache,img)
 	html.generate(whois.rpsl,sys.stdout)
 except IOError,e:
 	print '%s' % str(e)

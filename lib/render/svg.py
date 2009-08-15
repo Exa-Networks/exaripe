@@ -42,12 +42,12 @@ class SVG (object):
 <rect x="%d" y="%d" width="%d" height="%d" fill="rgb%s" stroke-width="1" stroke="rgb%s" %s/>
 """ % (x,y,sx,sy,str(color_fill),str(color_border),javascript if javascript else '')
 
-	def _text (self,x,y,font,color,string):
+	def _text (self,x,y,font,color,string,javascript=None):
 		return """\
-<text x="%d" y="%d" fill="rgb%s" font-size="12">
+<text x="%d" y="%d" fill="rgb%s" font-size="12" %s>
 %s
 </text>
-""" % (x,y,str(color),string)
+""" % (x,y,str(color),javascript if javascript else '',string)
 
 	def generate (self,rpsl,dir,name):
 		self.name = os.path.join(dir,name)
@@ -90,31 +90,22 @@ class SVG (object):
 			18      : (255, 200,   0),
 		}
 		
-		svg = self._svg(1050 + self.left, (rpsl.nb24s*self.size_y) + self.top + 1 + 100)
+		svg = self._svg(1050 + self.left, (rpsl.nb24s*self.size_y) + self.top + 10)
 		content = ''
 
 		if self.js:
 			content += '''
 <script type="text/javascript"><![CDATA[
-function listProperties(obj) {
-   var propList = "";
-   for(var propName in obj) {
-      if(typeof(obj[propName]) != "undefined") {
-         propList += (propName + ", ");
-      }
-   }
-   alert(propList);
-}
 function showPrefix(id) {
-  elt = document.getElementById(id);
-  var loc = document.getElementById("loc");
+  elt = top.document.getElementById(id);
+  var loc = top.document.getElementById("loc");
   loc.innerHTML = elt.innerHTML;
   loc.style.display = "block";
 }
 
 function hidePrefix() {
-  document.getElementById("loc").innerHTML = "";
-  var loc = document.getElementById("loc");
+  top.document.getElementById("loc").innerHTML = "";
+  var loc = top.document.getElementById("loc");
   loc.style.display = "none";
 }
 
@@ -212,7 +203,7 @@ function showPrefixAlert(id) {
 						last = max(0,(xr-xl)/self.font -2)
 						descr = descr[:last] + '..' if last else ''
 
-					content += self._text(xl+4,y+14,self.font,color['black'],descr)
+					content += self._text(xl+4,y+14,self.font,color['black'],descr,javascript)
 
 					try:
 						self.location[range].append(((xl+1,y+1),(xr-1,y+self.size_y-1)))

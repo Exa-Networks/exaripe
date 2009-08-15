@@ -59,7 +59,6 @@ function showPrefixAlert(id) {
           </xsl:for-each>
         </map>
         <div id="loc"/>
-        <br/><br/>
         <xsl:for-each select="/prefixes/prefix">
           <div class="cap" id="a{@id}">
             <h3><xsl:value-of select="@netname"/></h3>
@@ -69,6 +68,11 @@ function showPrefixAlert(id) {
             <p><xsl:value-of select="@start"/> - <xsl:value-of select="@end"/></p>
           </div>
         </xsl:for-each>
+        <br/><br/>
+        <br/><br/>
+        <br/><br/>
+        <br/><br/>
+        <br/><br/>
       </body>
     </html>
   </xsl:template>
