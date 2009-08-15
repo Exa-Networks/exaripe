@@ -3,14 +3,14 @@ import gd
 from netaddr import CIDR,nrange
 
 class PNG (object):
-	def __init__ (self,allocation,prefix,top,left,right,size_y,size_x,font):
+	def __init__ (self,allocation,prefix,top,left,right,size_y,size_x):
 		self.allocation = allocation
 		self.prefix = prefix
 		self.left = left
 		self.right = right
 		self.top = top
 
-		self.font = font
+		self.font = max(1,int(2*size_y/3))
 		self.size_y = size_y
 		self.size_x = size_x
 		self.length = size_x*256
@@ -134,10 +134,14 @@ class PNG (object):
 					if remarks == 'INFRA-AW':
 						image.rectangle((xl+1,y+1),(xr-1,y+self.size_y-1),color['red'])
 						image.rectangle((xl+2,y+2),(xr-2,y+self.size_y-2),color['red'])
-					if len(descr) * self.font > (xr-xl) - 6:
-						last = max(0,(xr-xl)/self.font -2)
-						descr = descr[:last] + '..' if last else ''
-					image.string(gd.gdFontSmall,(xl+4,y+3),descr,color['black'])
+					if len(descr) * self.font / 2> (xr-xl):
+						last = max(0,(xr-xl)/(self.font/2) -1)
+						if last:
+							descr = descr[:last] if last < 5 else descr[:last-2] + '..'
+						else:
+							descr = ''
+						
+					image.string(gd.gdFontSmall,(xl+3,y+3),descr,color['black'])
 
 					try:
 						self.location[range].append((id,(xl+1,y+1),(xr-1,y+self.size_y-1)))

@@ -28,9 +28,9 @@ def home ():
 		<input type="text" name="allocation" size="30" value="195.66.224.0/19" />
 		<input type="submit" value="Submit" />
 		<br />
-		Randering :
-		<input type="radio" name="rendering" value="png" checked="checked" />png
-		<input type="radio" name="rendering" value="svg" >svg
+		Rendering :
+		<input type="radio" name="rendering" value="svg" checked="checked" />svg
+		<input type="radio" name="rendering" value="png"                   />png
 		<br />
 		
 	</form>
@@ -96,10 +96,10 @@ except ValueError,e:
 
 if rendering == 'svg':
 	from render.svg import SVG as Image
-	image = Image(allocation,store,75,75,105,20,4,6,True)
+	image = Image(allocation,store,75,75,105,20,3,True)
 if rendering == 'png':
 	from render.png import PNG as Image
-	image = Image(allocation,store,75,75,105,20,4,6)
+	image = Image(allocation,store,75,75,105,20,4)
 
 from render.html import HTML
 html = HTML(xslt,image)

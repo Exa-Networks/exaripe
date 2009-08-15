@@ -3,7 +3,7 @@ import os
 from netaddr import CIDR,nrange
 
 class SVG (object):
-	def __init__ (self,allocation,prefix,top,left,right,size_y,size_x,font,js=False):
+	def __init__ (self,allocation,prefix,top,left,right,size_y,size_x,js=False):
 		self.allocation = allocation
 		self.prefix = prefix
 		self.left = left
@@ -11,7 +11,7 @@ class SVG (object):
 		self.top = top
 		self.js = js
 
-		self.font = font
+		self.font = max(1,int(2*size_y/3)) 
 		self.size_y = size_y
 		self.size_x = size_x
 		self.length = size_x*256
@@ -44,10 +44,10 @@ class SVG (object):
 
 	def _text (self,x,y,font,color,string,javascript=None):
 		return """\
-<text x="%d" y="%d" fill="rgb%s" font-size="12" %s>
+<text x="%d" y="%d" fill="rgb%s" font-size="%d" %s>
 %s
 </text>
-""" % (x,y,str(color),javascript if javascript else '',string)
+""" % (x,y,str(color),font,javascript if javascript else '',string)
 
 	def generate (self,rpsl,dir,name):
 		self.name = os.path.join(dir,name)
@@ -144,9 +144,9 @@ function showPrefixAlert(id) {
 		for n in nrange(cidr[0],cidr[-1],256):
 			ranges.append((n,y))
 			range = str(n)
-			t = y + 12
+			t = y + self.font + 1
 			content += self._line(self.left,y, self.left+self.length,y, color['black'], False)
-			content += self._text(self.left - (self.font * len(range)) - self.font/2, t, self.font,color['black'],range)
+			content += self._text(self.left - (self.font*len(range)/2), t, self.font,color['black'],range)
 			y+=self.size_y
 		
 		# The horizontal numbering
@@ -157,7 +157,6 @@ function showPrefixAlert(id) {
 			content += self._line(x,yt,x,yb,color['black'],True)
 			content += self._text(x+4,yt,self.font,color['black'],str(n))
 		
-	
 		# Each inetnum
 		v = 0
 		id = 0
@@ -199,12 +198,14 @@ function showPrefixAlert(id) {
 					if self.js: javascript = '''onmouseover="showPrefix('a%(id)s')" onmouseout="hidePrefix()" onclick="showPrefixAlert('a%(id)s')"''' % {'id':id}
 					content += self._rectangle(xl,y,xs,self.size_y,border,back,javascript)
 
-					if len(descr) * self.font > (xr-xl) - 6:
-						last = max(0,(xr-xl)/self.font -2)
-						descr = descr[:last] + '..' if last else ''
+					if len(descr) * self.font / 2  > xs:
+						last = max(0,(xs/(self.font/2))-1)
+						if last:
+							descr = descr[:last] if last < 5 else descr[:last-2] + '..'
+						else:
+							descr = ''
 
-					content += self._text(xl+4,y+14,self.font,color['black'],descr,javascript)
-
+					content += self._text(xl+2,y+14,self.font,color['black'],descr,javascript)
 					try:
 						self.location[range].append((id,(xl+1,y+1),(xr-1,y+self.size_y-1)))
 						id += 1
