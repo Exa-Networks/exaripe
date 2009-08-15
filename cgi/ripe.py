@@ -96,7 +96,7 @@ except ValueError,e:
 
 if rendering == 'svg':
 	from render.svg import SVG as Image
-	image = Image(allocation,store,75,75,105,20,3,True)
+	image = Image(allocation,store,75,75,105,20,4,True)
 if rendering == 'png':
 	from render.png import PNG as Image
 	image = Image(allocation,store,75,75,105,20,4)

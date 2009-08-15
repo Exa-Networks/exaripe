@@ -33,29 +33,30 @@ class SVG (object):
 
 	def _line (self,x1,y1,x2,y2,color,stroke=False):
 		return """\
-<line x1="%d" y1="%d" x2="%d" y2="%d" stroke="rgb%s" stroke-width="1"%s/>
-""" % (x1,y1,x2,y2,str(color),' stroke-dasharray="3,2"' if stroke else '')
+<line x1="%s" y1="%s" x2="%s" y2="%s" stroke="rgb%s" stroke-width="1"%s/>
+""" % (str(x1),str(y1),str(x2),str(y2),str(color),' stroke-dasharray="3,2"' if stroke else '')
 
 #<rect x="%d" y="%d" width="%d" height="%d" style="fill:rgb%s;stroke-width:1;stroke:rgb%s"/>
 	def _rectangle (self,x,y,sx,sy,color_border=(0,0,0),color_fill=(255,255,255),javascript=None):
 		return"""\
-<rect x="%d" y="%d" width="%d" height="%d" fill="rgb%s" stroke-width="1" stroke="rgb%s" %s/>
-""" % (x,y,sx,sy,str(color_fill),str(color_border),javascript if javascript else '')
+<rect x="%s" y="%s" width="%s" height="%s" fill="rgb%s" stroke-width="1" stroke="rgb%s" %s/>
+""" % (str(x),str(y),str(sx),str(sy),str(color_fill),str(color_border),javascript if javascript else '')
 
-	def _text (self,x,y,font,color,string,javascript=None):
+	def _text (self,x,y,font,color,string,options=None):
 		return """\
-<text x="%d" y="%d" fill="rgb%s" font-size="%d" %s>
+<text x="%s" y="%s" fill="rgb%s" font-size="%s" %s>
 %s
 </text>
-""" % (x,y,str(color),font,javascript if javascript else '',string)
+""" % (str(x),str(y),str(color),str(font),options if options else '',string)
 
 	def generate (self,rpsl,dir,name):
+		cidr = CIDR(self.allocation)
+
 		self.name = os.path.join(dir,name)
 		self.link = os.path.join(self.prefix,name)
-		self.width = 1050 + self.left
+		left = (self.font*len(cidr[-1])/5) + 10
+		self.width = left + 256*self.size_x + 10
 		self.height = (rpsl.nb24s*self.size_y) + self.top + 1 + 100
-
-		cidr = CIDR(self.allocation)
 
 		per24 = rpsl.fragment()
 
@@ -90,7 +91,7 @@ class SVG (object):
 			18      : (255, 200,   0),
 		}
 		
-		svg = self._svg(1050 + self.left, (rpsl.nb24s*self.size_y) + self.top + 10)
+		svg = self._svg(left + self.size_x*256 + 10, (rpsl.nb24s*self.size_y) + self.top + 10)
 		content = ''
 
 		if self.js:
@@ -127,16 +128,17 @@ function showPrefixAlert(id) {
 '''
 
 		# The outer box
-		content += self._rectangle(self.left,self.top, self.length,rpsl.nb24s*self.size_y, color['black'],color['white'])
+		content += self._rectangle(left,self.top, self.length,rpsl.nb24s*self.size_y, color['black'],color['white'])
 
 		# The color legend
 		keys = background.keys()
 		keys.sort()
-		x = self.left + 100
+		x = 1
 		for k in keys:
-			content += self._rectangle(x-1,14, 12,12, color['black'],background[k])
-			content += self._text(x+17,24,self.font,color['black'],'/%d' % k)
-			x += 50
+			p = str(int(x*100/(len(keys)+2))) + "%"
+			content += self._rectangle(p,5, 12,12, color['black'],background[k])
+			content += self._text(p,30,self.font,color['black'],'/%d' % k)
+			x += 1
 		
 		# The horizontal lines
 		y = self.top
@@ -145,17 +147,17 @@ function showPrefixAlert(id) {
 			ranges.append((n,y))
 			range = str(n)
 			t = y + self.font + 1
-			content += self._line(self.left,y, self.left+self.length,y, color['black'], False)
-			content += self._text(self.left - (self.font*len(range)/2), t, self.font,color['black'],range)
+			content += self._line(left,y, left+self.length,y, color['black'], False)
+			content += self._text(left - (self.font*len(range)/2), t, self.font,color['black'],range)
 			y+=self.size_y
 		
 		# The horizontal numbering
 		yt = self.top - 12
 		yb = self.top + rpsl.nb24s*self.size_y
 		for n in xrange(16,256,16):
-			x = self.left+(n*self.size_x)
+			x = left+(n*self.size_x)
 			content += self._line(x,yt,x,yb,color['black'],True)
-			content += self._text(x+4,yt,self.font,color['black'],str(n))
+			content += self._text(x+4,yt-self.font*2,self.font,color['black'],str(n),'writing-mode="tb"')
 		
 		# Each inetnum
 		v = 0
@@ -173,14 +175,14 @@ function showPrefixAlert(id) {
 				while wrap:
 					wrap = True if start + size > 256 else False
 					if wrap:
-						xl = self.left + (start*self.size_x)
+						xl = left + (start*self.size_x)
 						xs = 256*self.size_x
-						xr = self.left + xs
+						xr = left + xs
 						incr = (256 - start)
 						size -= incr
 						start = 0
 					else:
-						xl = self.left + (start*self.size_x)
+						xl = left + (start*self.size_x)
 						xs = size*self.size_x
 						xr = xl + xs
 						incr = size

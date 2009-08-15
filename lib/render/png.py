@@ -6,7 +6,6 @@ class PNG (object):
 	def __init__ (self,allocation,prefix,top,left,right,size_y,size_x):
 		self.allocation = allocation
 		self.prefix = prefix
-		self.left = left
 		self.right = right
 		self.top = top
 
@@ -22,13 +21,14 @@ class PNG (object):
 		self.height = 0
 
 	def generate (self,rpsl,dir,name):
-		self.name = os.path.join(dir,name)
-		self.link = os.path.join(self.prefix,name)
-		self.width = 1050 + self.left
-		self.height = (rpsl.nb24s*self.size_y) + self.top + 10
- 
 		cidr = CIDR(self.allocation)
 
+		self.name = os.path.join(dir,name)
+		self.link = os.path.join(self.prefix,name)
+		left = (self.font*len(cidr[-1])/5) + 10
+		self.width = left + 256*self.size_x + 10
+		self.height = (rpsl.nb24s*self.size_y) + self.top + 10
+ 
 		per24 = rpsl.fragment()
 
 		slash = {}
@@ -67,17 +67,18 @@ class PNG (object):
 		gd.gdMaxColors = 256 * 256 * 256
 		
 		# The outer box
-		image.rectangle((self.left,self.top),(self.left+self.length,self.top+(rpsl.nb24s*self.size_y)),color['black'])
+		image.rectangle((left,self.top),(left+self.length,self.top+(rpsl.nb24s*self.size_y)),color['black'])
 		
 		# The color legend
 		keys = background.keys()
 		keys.sort()
-		x = self.left + 100
+		inc = self.width /17
+		x = inc
 		for k in keys:
-			image.rectangle((x-1,14),(x+11,26),color['black'])
-			image.filledRectangle((x,15),(x+10,25),background[k])
-			image.string(gd.gdFontSmall,(x+17,14),'/%d' % k,color['black'])
-			x += 50
+			image.rectangle((x-1,4),(x+11,16),color['black'])
+			image.filledRectangle((x,5),(x+10,15),background[k])
+			image.string(gd.gdFontSmall,(x,25),'/%d' % k,color['black'])
+			x += inc
 		
 		# The horizontal lines
 		y = self.top
@@ -86,8 +87,8 @@ class PNG (object):
 			ranges.append((n,y))
 			range = str(n)
 			t = y + 3
-			image.line((self.left,y),(self.left+self.length,y),color['black'])
-			image.string(gd.gdFontSmall, (self.left - (self.font * len(range)) - self.font/2, t), range, color['black'])
+			image.line((left,y),(left+self.length,y),color['black'])
+			image.string(gd.gdFontSmall, (left - (self.font*len(range)/2) , t), range, color['black'])
 			y+=self.size_y
 		
 		image.setStyle((color['black'],color['black'],color['black'],gd.gdTransparent,gd.gdTransparent,gd.gdTransparent))
@@ -96,7 +97,7 @@ class PNG (object):
 		yt = self.top - 12
 		yb = self.top + rpsl.nb24s*self.size_y
 		for n in xrange(0,256,16):
-			x = self.left+(n*self.size_x)
+			x = left+(n*self.size_x)
 			image.line((x,yt),(x,yb),gd.gdStyled)
 			image.stringUp(gd.gdFontSmall,(x,yt),str(n),color['black'])
 		
@@ -116,13 +117,13 @@ class PNG (object):
 				while wrap:
 					wrap = True if start + size > 256 else False
 					if wrap:
-						xl = self.left + (start*self.size_x)
-						xr = self.left + (256*self.size_x)
+						xl = left + (start*self.size_x)
+						xr = left + (256*self.size_x)
 						incr = (256 - start)
 						size -= incr
 						start = 0
 					else:
-						xl = self.left + (start*self.size_x)
+						xl = left + (start*self.size_x)
 						xr = xl + (size*self.size_x)
 						incr = size
 
