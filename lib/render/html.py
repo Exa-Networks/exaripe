@@ -25,10 +25,9 @@ class HTML (object):
 		for error in rpsl.errors:
 			etree.SubElement(prefixes,'error').text = error
 
-		id = 0
 		for range in rpsl.inetnum.keys():
 			data = rpsl.inetnum[range]
-			for ((xl,yl),(xr,yr)) in self.map.location[range]:
+			for (id,(xl,yl),(xr,yr)) in self.map.location[range]:
 				prefix = etree.Element ('prefix')
 
 				prefix.set('id',str(id))
@@ -46,7 +45,6 @@ class HTML (object):
 				prefix.set('netname',' '.join(data.get('netname','NO NAME')))
 
 				prefixes.append(prefix)
-				id += 1
 
 		destination.write(etree.tostring(style.apply(prefixes)))
 

@@ -103,6 +103,7 @@ class PNG (object):
 	
 		# Each inetnum
 		v = 0
+		id = 0
 		for row in nrange(cidr[0],cidr[-1],256):
 			y = self.top + (v*self.size_y)
 			for range in per24.get(row,[]):
@@ -139,9 +140,11 @@ class PNG (object):
 					image.string(gd.gdFontSmall,(xl+4,y+3),descr,color['black'])
 
 					try:
-						self.location[range].append(((xl+1,y+1),(xr-1,y+self.size_y-1)))
+						self.location[range].append((id,(xl+1,y+1),(xr-1,y+self.size_y-1)))
+						id += 1
 					except KeyError:
-						self.location[range] = [((xl+1,y+1),(xr-1,y+self.size_y-1))]
+						self.location[range] = [(id,(xl+1,y+1),(xr-1,y+self.size_y-1))]
+						id += 1
 
 					if wrap:
 						y += self.size_y

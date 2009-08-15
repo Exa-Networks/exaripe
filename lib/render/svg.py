@@ -160,7 +160,7 @@ function showPrefixAlert(id) {
 	
 		# Each inetnum
 		v = 0
-		id = 1
+		id = 0
 		javascript = ''
 		for row in nrange(cidr[0],cidr[-1],256):
 			y = self.top + (v*self.size_y)
@@ -206,10 +206,10 @@ function showPrefixAlert(id) {
 					content += self._text(xl+4,y+14,self.font,color['black'],descr,javascript)
 
 					try:
-						self.location[range].append(((xl+1,y+1),(xr-1,y+self.size_y-1)))
+						self.location[range].append((id,(xl+1,y+1),(xr-1,y+self.size_y-1)))
 						id += 1
 					except KeyError:
-						self.location[range] = [((xl+1,y+1),(xr-1,y+self.size_y-1))]
+						self.location[range] = [(id,(xl+1,y+1),(xr-1,y+self.size_y-1))]
 						id += 1
 
 					if wrap:
