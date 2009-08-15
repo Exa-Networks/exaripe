@@ -3,7 +3,7 @@ import os
 from netaddr import CIDR,nrange
 
 class SVG (object):
-	def __init__ (self,allocation,prefix,top,left,right,size_y,size_x,js=False):
+	def __init__ (self,allocation,prefix,top,left,right,size_y,size_x,font,js=False):
 		self.allocation = allocation
 		self.prefix = prefix
 		self.left = left
@@ -11,7 +11,7 @@ class SVG (object):
 		self.top = top
 		self.js = js
 
-		self.font = 6
+		self.font = font
 		self.size_y = size_y
 		self.size_x = size_x
 		self.length = size_x*256
@@ -160,7 +160,7 @@ function showPrefixAlert(id) {
 	
 		# Each inetnum
 		v = 0
-		id = 0
+		id = 1
 		javascript = ''
 		for row in nrange(cidr[0],cidr[-1],256):
 			y = self.top + (v*self.size_y)

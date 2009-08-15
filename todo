@@ -2,3 +2,6 @@ parse the juniper "unicast statement in BGP"
 parse the juniper configuration taking care of protocol bgp and group export/configuration
 fix a bug when long name are displayed on the ripe rendering tool with block of one IP
 look at inlining the svg: http://wiki.svg.org/Inline_SVG
+the rendering is only really working for the values used and not smaller size_x or font
+Bug in the svg mapping code of block to content
+Bug The alert comment does not contain all the description

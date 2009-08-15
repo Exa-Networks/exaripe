@@ -3,14 +3,14 @@ import gd
 from netaddr import CIDR,nrange
 
 class PNG (object):
-	def __init__ (self,allocation,prefix,top,left,right,size_y,size_x):
+	def __init__ (self,allocation,prefix,top,left,right,size_y,size_x,font):
 		self.allocation = allocation
 		self.prefix = prefix
 		self.left = left
 		self.right = right
 		self.top = top
 
-		self.font = 6
+		self.font = font
 		self.size_y = size_y
 		self.size_x = size_x
 		self.length = size_x*256
