@@ -3,7 +3,7 @@ feature missing:
 	parse the juniper configuration taking care of protocol bgp and group export/configuration
 
 bug:
-	the rendering is only really working for the values used and not smaller size_x or font
+	the rendering does not like larger/smaller values of size_y (svg most affected)
 
 idea:
 	look at inlining the svg: http://wiki.svg.org/Inline_SVG
