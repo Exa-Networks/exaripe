@@ -1,9 +1,11 @@
 import os
+import cgi
 
 from netaddr import CIDR,nrange
 
 class SVG (object):
 	def __init__ (self,allocation,prefix,top,left,right,size_y,size_x,js=False):
+		self.tooltip_id = 0
 		self.allocation = allocation
 		self.prefix = prefix
 		self.left = left
@@ -47,7 +49,46 @@ class SVG (object):
 <text x="%s" y="%s" fill="rgb%s" font-size="%s" %s>
 %s
 </text>
-""" % (str(x),str(y),str(color),str(font),options if options else '',string)
+""" % (str(x),str(y),str(color),str(font),options if options else '',cgi.escape(string))
+
+	def _tooltip (self,x,y,font,color,string,tooltips,options=None):
+		yn = y+self.size_y
+		d = {
+			'id': 'tooltip%d' % self.tooltip_id,
+			'x' : str(x+2),
+			'y' : str(y),
+			'x-box' : str(x-2),
+			'y-box' : str(yn),
+			'color' : str(color),
+			'font' : str(font),
+			'string' : cgi.escape(string),
+			'options' : options if options else '',
+			'rgb' : '(155,155,155)',
+			'width' : max([len(s) for s in tooltips])*self.font/2 + 10,
+			'height' : len(tooltips)*font+5,
+		}
+		self.tooltip_id += 1
+
+		tooltip = ""
+		for t in tooltips:
+			d['tooltip'] = cgi.escape(t)
+			yn += font
+			d['y-next'] = str(yn)
+			tooltip += """\
+  <text x="%(x)s" y="%(y-next)s" font-size="%(font)s" fill="black" visibility="hidden">%(tooltip)s
+    <set attributeName="visibility" from="hidden" to="visible" begin="%(id)s.mouseover" end="%(id)s.mouseout"/>
+  </text>
+""" % d
+		d['tooltip'] = tooltip
+		return """\
+<text id="%(id)s" x="%(x)s" y="%(y)s" fill="rgb%(color)s" font-size="%(font)s" %(options)s>
+%(string)s
+</text>
+   <rect x="%(x-box)s" y="%(y-box)s" width="%(width)s" height="%(height)s" visibility="hidden" style="fill:rgb(255,255,255);fill-opacity:1.0;stroke:blue;stroke-width:2;">
+       <set attributeName="visibility" from="hidden" to="visible" begin="%(id)s.mouseover" end="%(id)s.mouseout"/>
+   </rect>
+%(tooltip)s
+""" % d
 
 	def generate (self,rpsl,dir,name):
 		cidr = CIDR(self.allocation)
@@ -93,6 +134,7 @@ class SVG (object):
 		
 		svg = self._svg(left + self.size_x*256 + 10, (rpsl.nb24s*self.size_y) + self.top + 10)
 		content = ''
+		tooltips = ''
 
 		if self.js:
 			content += '''
@@ -197,7 +239,8 @@ function showPrefixAlert(id) {
 					except KeyError:
 						back = color['grey']
 
-					if self.js: javascript = '''onmouseover="showPrefix('a%(id)s')" onmouseout="hidePrefix()" onclick="showPrefixAlert('a%(id)s')"''' % {'id':id}
+					if self.js:
+						javascript = '''onmouseover="showPrefix('a%(id)s')" onmouseout="hidePrefix()" onclick="showPrefixAlert('a%(id)s')"''' % {'id':id}
 					content += self._rectangle(xl,y,xs,self.size_y,border,back,javascript)
 
 					if len(descr) * self.font / 2  > xs:
@@ -207,7 +250,12 @@ function showPrefixAlert(id) {
 						else:
 							descr = ''
 
-					content += self._text(xl+2,y+14,self.font,color['black'],descr,javascript)
+					tps = rpsl.inetnum[range]['netname'] + ["%s - %s" % (rpsl.inetnum[range]['start'],rpsl.inetnum[range]['end'])] + rpsl.inetnum[range].get('descr',[''])
+					#if self.js:
+					#	content += self._text(xl+2,y+14,self.font,color['black'],descr,javascript)
+					#else:
+					#	tooltips += self._tooltip(xl+2,y+14,self.font,color['black'],descr,tps,javascript)
+					tooltips += self._tooltip(xl+2,y+14,self.font,color['black'],descr,tps,javascript)
 					try:
 						self.location[range].append((id,(xl+1,y+1),(xr-1,y+self.size_y-1)))
 						id += 1
@@ -220,5 +268,5 @@ function showPrefixAlert(id) {
 			v += 1
 		
 		with open(self.name,'w+') as w:
-			w.write(svg % content)
+			w.write(svg % (content+tooltips))
 		
