@@ -250,12 +250,11 @@ function showPrefixAlert(id) {
 						else:
 							descr = ''
 
-					tps = rpsl.inetnum[range]['netname'] + ["%s - %s" % (rpsl.inetnum[range]['start'],rpsl.inetnum[range]['end'])] + rpsl.inetnum[range].get('descr',[''])
-					#if self.js:
-					#	content += self._text(xl+2,y+14,self.font,color['black'],descr,javascript)
-					#else:
-					#	tooltips += self._tooltip(xl+2,y+14,self.font,color['black'],descr,tps,javascript)
-					tooltips += self._tooltip(xl+2,y+14,self.font,color['black'],descr,tps,javascript)
+					if self.js:
+						content += self._text(xl+2,y+14,self.font,color['black'],descr,javascript)
+					else:
+						tps = rpsl.inetnum[range]['netname'] + ["%s - %s" % (rpsl.inetnum[range]['start'],rpsl.inetnum[range]['end'])] + rpsl.inetnum[range].get('descr',[''])
+						tooltips += self._tooltip(xl+2,y+14,self.font,color['black'],descr,tps,javascript)
 					try:
 						self.location[range].append((id,(xl+1,y+1),(xr-1,y+self.size_y-1)))
 						id += 1
