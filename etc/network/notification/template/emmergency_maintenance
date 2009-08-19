@@ -1,0 +1,16 @@
+[emmergency_maintenance]
+Dear %(organisation)s,
+
+We would like to inform you that the peering connection between %(our_asn)s and %(your_asn)s at %(exchange)s will be affected by a planned maintenance.
+
+Information about the maintenance:
+ - starting date: %(start)s
+ - expected completion : %(end)s
+
+%(reason)s
+
+Please ignore any alarm your router %(your_ip)s could see for our router %(our_ip)s
+
+Regards,
+
+%(signed)s NOC Team

@@ -1,0 +1,17 @@
+#!/bin/bash
+
+dirname=`dirname $0`
+
+if [[ $dirname == /* ]]; then
+	path=$dirname/..
+else
+	cd `pwd`/$dirname/.. > /dev/null
+	path=`pwd`
+	cd - > /dev/null
+fi
+
+#$path/bin/locate-juniper
+#$path/bin/locate-juniper -d
+#$path/bin/locate-juniper -d | $path/bin/parse-juniper
+#$path/bin/locate-juniper -d | $path/bin/parse-juniper | $path/bin/export-ripe
+$path/bin/locate-juniper -d | $path/bin/parse-juniper | $path/bin/export-notification

@@ -1,0 +1,8 @@
+[maintenance_completion]
+Dear %(organisation)s,
+
+The maintenance is now closed. It is now beer time.
+
+Regards,
+
+%(signed)s NOC Team

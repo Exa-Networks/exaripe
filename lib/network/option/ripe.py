@@ -5,10 +5,10 @@ from network.option.options import Options
 class RIPE (Options):
 	folder = 'ripe'
 	format = {
-                'asn' :         False,
-                'company' :     False,
-                'macro' :       False,
-                'preference' :  False,
+		'asn' :	 False,
+		'company' :     False,
+		'macro' :       False,
+		'preference' :  False,
 
 		'footer' :	True,
 		'header' :	True,

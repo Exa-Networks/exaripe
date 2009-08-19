@@ -4,7 +4,9 @@ feature missing:
 
 bug:
 	the rendering does not like larger/smaller values of size_y (svg most affected)
+	ipv6 matching for exchange test (may work need to test)
 
 idea:
 	look at inlining the svg: http://wiki.svg.org/Inline_SVG
-
+	filter route from Linx RS when you have a direct peering connection.
+	integration with asused

@@ -30,6 +30,8 @@ class CommandLine (dict):
 
 		'filter':	('filter','f','store_true',''),
 		'aligned':	('aligned','a','store_true','does the ip have to be aligned with their netmask'),
+		'exchange':	('exchange','x','append','the exchange affected by the maintenance'),
+		'router':	('router','r','append','the router affected by the maintenance'),
 	}
 
 	def __init__ (self,usage,options):
