@@ -26,14 +26,6 @@ for line in sys.stdin.readlines():
 		print >> sys.stderr, "problem parsing line:\n" + line.strip()
 		sys.exit(1)
 
-routers = [exporter.routers()[0]]
-atypes = ['peer']
-groups = []
-
-exporter.filter_router(routers)
-exporter.filter_type(atypes)
-exporter.filter_group(groups)
-
 ###############################################
 # This should be in its own include file ..
 ###############################################
@@ -50,7 +42,7 @@ def query (prefix,options):
 	print >> sys.stderr, '\r',prefix
 	store = {}
 	index = 0
-	for k in options.keys():
+	for k in options:
 		store[str(index)] = k
 		index += 1
 	keys = store.keys()
@@ -103,7 +95,7 @@ class Template (object):
 
 	def __init__ (self,section='template'):
 		options = OptionsNotification(section)
-		key = query('%s :' % section,options)
+		key = query('%s :' % section,options.keys())
 		content = options[key]
 		
 		reply = []
@@ -129,6 +121,18 @@ class Template (object):
 
 ###############################################
 
+routers = query('routers affected',['every router']+exporter.routers())
+if routers == 'every router': routers = []
+exporter.filter_router(routers)
+
+relations = query('relations affected',['every relation']+exporter.relations())
+if relations == 'every relation': relations = []
+exporter.filter_relation(relations)
+
+groups = query('groups affected',['every group']+exporter.groups())
+if groups == 'every group': groups = []
+exporter.filter_group(groups)
+
 mails = []
 missing = []
 
@@ -153,11 +157,13 @@ for sender,recipient,subject,body,asn,organisation in exporter.generate(Template
 if not len(mails):
 	sys.exit(1)
 
-print >> sys.stderr, '\r','-'*30, 'PREVIEW (%-3d recipients)' % len(mails), '-'*30
+print >> sys.stderr, '\n','-'*30, 'PREVIEW (%-3d recipients)' % len(mails), '-'*30
 print >> sys.stderr, """%s""" % mails[0],
 print >> sys.stderr, '-'*80
 print >> sys.stderr
-print >> sys.stderr, '\rThose organisations have no contact information\n%s\n' % "\n * ".join(missing)
+
+if len(missing):
+	print >> sys.stderr, '\rThose organisations have no contact information\n%s\n' % "\n * ".join(missing)
 
 if raw("[Y/N]",['y','Y','n','N']) in ['Y','y']:
 	print """<xml>%s</xml>""" % "".join(mails)

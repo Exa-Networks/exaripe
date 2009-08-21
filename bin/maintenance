@@ -14,4 +14,4 @@ fi
 #$path/bin/locate-juniper -d
 #$path/bin/locate-juniper -d | $path/bin/parse-juniper
 #$path/bin/locate-juniper -d | $path/bin/parse-juniper | $path/bin/export-ripe
-$path/bin/locate-juniper -d | $path/bin/parse-juniper | $path/bin/export-notification
+$path/bin/locate-juniper -d | $path/bin/parse-juniper | $path/bin/export-notification | $path/bin/transmit-mail

@@ -7,7 +7,7 @@ class RIPE (object):
 	def parse (self,line):
 		try:
 			data = line.strip().split('|')
-			router,atype,group,asn,announce,policy,src,dest,macro,mail,name = data
+			router,relation,group,asn,announce,policy,src,dest,macro,mail,name = data
 		except:
 			return False
 
@@ -19,9 +19,9 @@ class RIPE (object):
 		nasn = int(asn)
 		if not self.data.has_key(nasn):
 			self.data[nasn] = {}
-		if not self.data[nasn].has_key(atype):
-			self.data[nasn][atype] = []
-		self.data[nasn][atype].append(data)
+		if not self.data[nasn].has_key(relation):
+			self.data[nasn][relation] = []
+		self.data[nasn][relation].append(data)
 
 		return True
 
@@ -31,14 +31,14 @@ class RIPE (object):
 		asns.sort()
 
 		for asn in asns:
-			for atype in self.data[asn]:
-				if not atype in display:
+			for relation in self.data[asn]:
+				if not relation in display:
 					continue
 
 				ordered = {4:{},6:{}}
 				inc = 0
-				for data in self.data[asn][atype]:
-					router,atype,group,asn,announce,policy,src,dest,macro,mail,name = data
+				for data in self.data[asn][relation]:
+					router,relation,group,asn,announce,policy,src,dest,macro,mail,name = data
 					if dest.count('.'):
 						a,b,c,d = dest.split('.')
 						ipn = (int(a) << 24) + (int(b) << 16) + (int(c) << 8) + int(d)
@@ -61,7 +61,7 @@ class RIPE (object):
 						ordered[6][index] = data
 
 	
-				result.append("remarks:        AS%s (%s) %s" % (asn,atype,name))
+				result.append("remarks:        AS%s (%s) %s" % (asn,relation,name))
 
 				accept = []
 				announce = []
@@ -81,7 +81,7 @@ class RIPE (object):
 		return result
 
 	def _generate (self,data):
-		router,atype,group,asn,announce,policy,src,dest,macro,mail,name = data
+		router,relation,group,asn,announce,policy,src,dest,macro,mail,name = data
 
 		inet = '6' if src.count(':') else '4'
 		at = "%s at %s" % (dest.lower(),src.lower())

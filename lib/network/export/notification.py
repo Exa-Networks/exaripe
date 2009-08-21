@@ -1,7 +1,7 @@
 from network.exchanges import Exchanges
 from network.option.ripe import RIPE
 
-class Answer (dict):
+class _Answer (dict):
 	def __getitem__ (self,name):
 		try:
 			return dict.__getitem__(self,name)
@@ -14,57 +14,69 @@ class Notification (object):
 		self.ripe = RIPE()
 		self.index = 0
 		self.data = []
-		self.router = []
-		self.atype = []
-		self.group = []
 		
-		self.filter_routers = []
-		self.filter_atypes = []
-		self.filter_groups = []
+		self._filter_router = []
+		self._filter_relation = []
+		self._filter_group = []
 
 	def parse (self,line):
 		try:
 			data = line.strip().split('|')
-			router,atype,group,asn,announce,policy,src,dest,macro,mail,name = data
+			router,relation,group,asn,announce,policy,src,dest,macro,mail,name = data
 		except:
 			return False
-
+		
+		for response in data:
+			if not response:
+				# XXX: Mean that we could not find all the info for the peer ...
+				return True
+		
 		self.data.append(data)
-		if not router in self.router: self.router.append(router)
-		if not atype in self.atype: self.atype.append(group)
-		if not group in self.group: self.group.append(group)
-		
 		return True
-
-	def types (self):
-		return self.atype
-
-	def groups (self):
-		return self.group
-		
-	def routers (self):
-		return self.router
-
-	def filter_router (self,routers):
-		self.filter_routers = routers
-		return self
-
-	def filter_type (self,atypes):
-		self.filter_atypes = atypes
-		return self
-
-	def filter_group (self,groups):
-		self.filter_groups = groups
-		return self
-
-	def generate (self,template):
+	
+	def _filtered (self):
 		for data in self.data:
-			router,atype,group,asn,announce,policy,src,dest,macro,mail,name = data
-			if self.filter_routers and router not in self.filter_routers: continue
-			if self.filter_atypes and atype not in self.filter_atypes: continue
-			if self.filter_groups and groups not in self.filter_groups: continue
+			router,relation,group,asn,announce,policy,src,dest,macro,mail,name = data
+			if self._filter_router and router not in self._filter_router: continue
+			if self._filter_relation and relation not in self._filter_relation: continue
+			if self._filter_group and group not in self._filter_group: continue
+			yield data
+	
+	def routers (self):
+		routers = []
+		for data in self._filtered():
+			if not data[0] in routers: routers.append(data[0])
+		return routers
+	
+	def relations (self):
+		relations = []
+		for data in self._filtered():
+			if not data[1] in relations: relations.append(data[1])
+		return relations
+	
+	def groups (self):
+		groups = []
+		for data in self._filtered():
+			if not data[2] in groups: groups.append(data[2])
+		return groups
+	
+	def filter_router (self,routers):
+		self._filter_router = routers
+		return self
+	
+	def filter_relation (self,relations):
+		self._filter_relation = relations
+		return self
+	
+	def filter_group (self,groups):
+		self._filter_group = groups
+		return self
+	
+	def generate (self,template):
+		for data in self._filtered():
+			router,relation,group,asn,announce,policy,src,dest,macro,mail,name = data
 			
-			replace = Answer({
+			replace = _Answer({
 				'router': router,
 				'our_ip': src,
 				'your_ip': dest,
@@ -74,7 +86,7 @@ class Notification (object):
 				'exchange': self.exchanges.name(dest),
 				'company': self.ripe['company']
 			})
-
+			
 			message = template.message() % replace
 			subject = template.subject() % replace
 			yield self.ripe['sender'],mail,subject,message,asn,name
