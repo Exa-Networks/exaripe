@@ -1,0 +1,16 @@
+[planned_maintenance]
+Dear %(peer_name)s,
+
+We would like to inform you that the peering connection between %(our_asn)s and %(your_asn)s at %(exchange)s will be affected by a planned maintenance.
+
+Information about the maintenance:
+ - starting date: <ask notification_starting_date date_time>
+ - expected completion : <ask notification_ending_date date_time>
+
+<include reason>
+
+Please ignore any alarm your router %(your_ip)s could see for our router %(our_ip)s
+
+Regards,
+
+%(company)s NOC Team

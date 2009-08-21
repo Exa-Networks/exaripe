@@ -3,15 +3,12 @@
 import os
 from network.option.options import Options
 
-class Template (Options):
-	folder = os.path.join('notification','template')
+class Notification (Options):
 	format = {
 	}
-
-class Reason (Options):
-	folder = os.path.join('notification','reason')
-	format = {
-	}
+	def __init__ (self,section):
+		self.folder = os.path.join('notification',section)
+		Options.__init__(self)
 
 if __name__ == '__main__':
 	import sys
@@ -21,14 +18,14 @@ if __name__ == '__main__':
 		print >> sys.stderr , problem
 		sys.exit(1)
 
-	for options in [NotificationTemplate(),NotificationReason()]:
-		for key in options.valid:
-			if key not in options:
-				usage('no configuration file found')
+	options = Notification('template')
+	for key in options.valid:
+		if key not in options:
+			usage('no configuration file found')
 
-		for option in options:
-			if options.format[option]:
-				print option,'\t','\n...\t'.join(options[option].split('\n'))
-			else:
-				print "%-15s\t%s" % (option,options[option])
+	for option in options:
+		if options.format[option]:
+			print option,'\t','\n...\t'.join(options[option].split('\n'))
+		else:
+			print "%-15s\t%s" % (option,options[option])
 	sys.exit(0)

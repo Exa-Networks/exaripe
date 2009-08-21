@@ -1,15 +1,6 @@
 from network.exchanges import Exchanges
 from network.option.ripe import RIPE
 
-class Discover (dict):
-	def __init__ (self):
-		self.found = []
-		dict.__init__(self)
-		
-	def __getitem__ (self,name):
-		if not name in self.found:
-			self.found.append(name)
-
 class Answer (dict):
 	def __getitem__ (self,name):
 		try:
@@ -66,14 +57,7 @@ class Notification (object):
 		self.filter_groups = groups
 		return self
 
-	def generate (self,template,reason,gettime):
-		t = template()
-		d = Discover()
-		_ = t % d
-		r = reason() if 'reason' in d.found else ''
-		s = gettime('please enter the start date') if 'start' in d.found else ''
-		e = gettime('please enter the end date') if 'end' in d.found else ''
-		
+	def generate (self,template):
 		for data in self.data:
 			router,atype,group,asn,announce,policy,src,dest,macro,mail,name = data
 			if self.filter_routers and router not in self.filter_routers: continue
@@ -86,12 +70,12 @@ class Notification (object):
 				'your_ip': dest,
 				'our_asn' : "AS%s" % self.ripe['asn'],
 				'your_asn' : "AS%s" % asn,
-				'organisation': name,
+				'peer_name': name,
 				'exchange': self.exchanges.name(dest),
-				'start': s,
-				'end': e,
-				'reason': r,
-				'signed': self.ripe['company']
+				'company': self.ripe['company']
 			})
-			
-			yield mail, t % replace
+
+			message = template.message() % replace
+			subject = template.subject() % replace
+			yield self.ripe['sender'],mail,subject,message,asn,name
+	

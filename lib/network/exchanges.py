@@ -37,5 +37,4 @@ class Exchanges (object):
 		for r in self.ranges.keys():
 			if IP(ip) in CIDR(r):
 				return self.ranges[r]
-		return ''
-
+		return ip

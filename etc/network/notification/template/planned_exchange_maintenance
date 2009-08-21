@@ -1,7 +1,0 @@
-[planned_exchange_maintenance]
-Dear %(organisation)s,
-
-We would like to informator you that the peering connection between %(our_asn)s and %(your_asn)s was affected by an un-plan problem.
-We will inform you when this is fixed.
-
-%(signed)s NOC Team
