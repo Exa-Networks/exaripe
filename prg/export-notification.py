@@ -46,6 +46,27 @@ def raw (prefix,valid):
 			if answer in valid: break
 	return answer
 
+def query (prefix,options):
+	print >> sys.stderr, '\r',prefix
+	store = {}
+	index = 0
+	for k in options.keys():
+		store[str(index)] = k
+		index += 1
+	keys = store.keys()
+	keys.sort()
+
+	with open('/dev/tty','r') as stdin:
+		while True:
+			for k in keys:
+				print >> sys.stderr, '\r',k, store[k].replace('_',' ')
+			print >> sys.stderr, '\rEnter your selection : ',
+			s = stdin.readline().strip()
+			if s in keys: break
+
+	return store[s]
+
+
 class Template (object):
 	re_date = re.compile('(20[01]\d)/(0?\d|1[012])/(0?\d|1\d|2\d|3[01]) (0?\d|1\d|2[0123]):(0?\d|[12345]\d)|(now)|(now)\+(\d+)([HhMm])')
 	re_include = re.compile('^\s?<include\s+(.*)\s?>\s?$')
@@ -81,8 +102,11 @@ class Template (object):
 	}
 
 	def __init__ (self,section='template'):
+		options = OptionsNotification(section)
+		key = query('%s :' % section,options)
+		content = options[key]
+		
 		reply = []
-		fname,content = self.query('%s :' % section,OptionsNotification(section))
 		for line in content.split('\n'):
 			match = self.re_include.search(line)
 			if match:
@@ -95,27 +119,7 @@ class Template (object):
 			reply.append(line)
 			
 		self._message = '\n'.join(reply)
-		self._subject = fname.replace('_',' ')
-
-	def query (self,prefix,options):
-		print >> sys.stderr, '\r',prefix
-		store = {}
-		index = 0
-		for k in options.keys():
-			store[str(index)] = k
-			index += 1
-		keys = store.keys()
-		keys.sort()
-	
-		with open('/dev/tty','r') as stdin:
-			while True:
-				for k in keys:
-					print >> sys.stderr, '\r',k, store[k].replace('_',' ')
-				print >> sys.stderr, '\rEnter your selection : ',
-				s = stdin.readline().strip()
-				if s in keys: break
-	
-		return store[s],options[store[s]]
+		self._subject = key.replace('_',' ')
 	
 	def message (self):
 		return self._message
@@ -146,15 +150,15 @@ for sender,recipient,subject,body,asn,organisation in exporter.generate(Template
 	cgi.escape(body),
 ))
 
-print >> sys.stderr, '-'*30, 'PREVIEW (%-3d recipients)' % len(mails), '-'*30
+if not len(mails):
+	sys.exit(1)
+
+print >> sys.stderr, '\r','-'*30, 'PREVIEW (%-3d recipients)' % len(mails), '-'*30
 print >> sys.stderr, """%s""" % mails[0],
 print >> sys.stderr, '-'*80
 print >> sys.stderr
+print >> sys.stderr, '\rThose organisations have no contact information\n%s\n' % "\n * ".join(missing)
 
-print >> sys.stderr, '\rThose organisations have no contact information\n%s\n[Y/N]' % "\n * ".join(missing)
-
-#print """<xml>%s</xml>""" % "".join(mails)
-
-
+if raw("[Y/N]",['y','Y','n','N']) in ['Y','y']:
+	print """<xml>%s</xml>""" % "".join(mails)
 sys.exit(0)
-

@@ -36,7 +36,7 @@ class Notification (object):
 		
 		return True
 
-	def atype (self):
+	def types (self):
 		return self.atype
 
 	def groups (self):
