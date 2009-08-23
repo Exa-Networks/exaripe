@@ -7,6 +7,12 @@ bug:
 	ipv6 matching for exchange test (may work need to test)
 
 idea:
-	look at inlining the svg: http://wiki.svg.org/Inline_SVG
+	look at inlining the svg:
+		http://wiki.svg.org/Inline_SVG
+		http://code.google.com/p/svgweb/
+		<script type="image/svg+xml">
+			<svg>
+			</svg>
+		</script>
 	filter route from Linx RS when you have a direct peering connection.
 	integration with asused
