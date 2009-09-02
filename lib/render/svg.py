@@ -83,7 +83,8 @@ class SVG (object):
 		return """\
 <text id="%(id)s" x="%(x)s" y="%(y)s" fill="rgb%(color)s" font-size="%(font)s" %(options)s>
 %(string)s
-</text>
+</text>""" % d, \
+"""\
    <rect x="%(x-box)s" y="%(y-box)s" width="%(width)s" height="%(height)s" visibility="hidden" style="fill:rgb(255,255,255);fill-opacity:1.0;stroke:blue;stroke-width:2;">
        <set attributeName="visibility" from="hidden" to="visible" begin="%(id)s.mouseover" end="%(id)s.mouseout"/>
    </rect>
@@ -254,7 +255,9 @@ function showPrefixAlert(id) {
 						content += self._text(xl+2,y+14,self.font,color['black'],descr,javascript)
 					else:
 						tps = rpsl.inetnum[range]['netname'] + ["%s - %s" % (rpsl.inetnum[range]['start'],rpsl.inetnum[range]['end'])] + rpsl.inetnum[range].get('descr',[''])
-						tooltips += self._tooltip(xl+2,y+14,self.font,color['black'],descr,tps,javascript)
+						c,t = self._tooltip(xl+2,y+14,self.font,color['black'],descr,tps,javascript)
+						content += c
+						tooltips += t
 					try:
 						self.location[range].append((id,(xl+1,y+1),(xr-1,y+self.size_y-1)))
 						id += 1
