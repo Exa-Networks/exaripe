@@ -16,3 +16,4 @@ idea:
 		</script>
 	filter route from Linx RS when you have a direct peering connection.
 	integration with asused
+	fully rewrite the Juniper parser (using bgp's config parser as base)

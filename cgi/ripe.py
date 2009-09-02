@@ -33,7 +33,7 @@ def home (allocation):
 		<input type="radio" name="rendering" value="png"                   />png
 		<br />
 		Experimental :
-                <input type="checkbox" name="javascript" value="true" checked="checked" />javascript event (untick for testing)
+                <input type="checkbox" name="javascript" value="false" checked="checked" />Use SVG for inetnum info
 	</form>
 	<br/>
 	Find the original perl version on which this work is based at: <a href="http://crazygreek.co.uk/content/ripe">http://crazygreek.co.uk/content/ripe</a>
@@ -100,7 +100,7 @@ if not validate_rendering(rendering):
 
 javascript = form.getfirst('javascript')
 if not validate_boolean(javascript):
-	javascript = 'false'
+	javascript = 'true'
 
 xslt   = os.path.join(dir,'etc','render','allocation-%s.xsl' % rendering)
 img    = "%s.%s" % (allocation.replace('/','-'),rendering)
