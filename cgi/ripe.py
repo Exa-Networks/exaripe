@@ -23,7 +23,7 @@ def home (allocation):
 	<h1><center>RIPE allocation display</center></h1>
 	<br/>
 	<br/>
-	<form name="range" action="ripe" method="get">
+	<form name="range" action="ripe.py" method="get">
 		Range : 
 		<input type="text" name="allocation" size="30" value="%s" />
 		<input type="submit" value="Submit" />
