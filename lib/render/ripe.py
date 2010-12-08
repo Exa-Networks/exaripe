@@ -22,8 +22,6 @@ class RPSL (object):
 		self.data += data
 
 	def complete (self):
-		key=''
-		value=''
 		for line in self.data.split('\n'):
 			if line == '': continue
 			if line.startswith('%'): continue
