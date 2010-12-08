@@ -22,9 +22,13 @@ class RPSL (object):
 		self.data += data
 
 	def complete (self):
+		key=''
+		value=''
 		for line in self.data.split('\n'):
 			if line == '': continue
 			if line.startswith('%'): continue
+			# a multiline key
+			if line.startswith(' '): line = "%s:%s" % (key,line)
 			try:
 				key, value = line.split(':',1)
 			except ValueError:
@@ -52,6 +56,8 @@ class RPSL (object):
 		for k in self.inetnum.keys():
 			r += '\n'
 			for k,vs in self.inetnum[k].iteritems():
+				if not hasattr(vs,'__iter__'):
+					vs = [vs]
 				for v in vs:
 					r += '%-12s %s\n' % ('%s:' % k, v)
 		return r
