@@ -103,7 +103,7 @@ class SVG (object):
 		per24 = rpsl.fragment()
 
 		slash = {}
-		for s in xrange(24,32+1):
+		for s in xrange(18,32+1):
 			slash[pow(2,32-s)] = s
 
 		color = {
@@ -125,12 +125,12 @@ class SVG (object):
 			26      : (  0, 255, 200),
 			25      : (  0, 250, 250),
 			24      : (  0, 200, 255),
-			23      : (  0, 150, 200),
-			22      : (  0, 100, 200),
-			21      : (  0,  80, 150),
-			20      : (  0,  50, 170),
-			19      : (255, 100,   0),
-			18      : (255, 200,   0),
+			23      : (150, 150, 200),
+			22      : (250, 200, 170),
+			21      : (255, 250,   0),
+			20      : (250, 100, 150),
+			19      : (255, 125,   0),
+			18      : (200, 100, 100),
 		}
 		
 		svg = self._svg(left + self.size_x*256 + 10, (rpsl.nb24s*self.size_y) + self.top + 10)
@@ -211,6 +211,7 @@ function showPrefixAlert(id) {
 			for range in per24.get(row,[]):
 				start = tuple(range)[-1]
 				size = rpsl.inetnum[range]['length']
+				block_size = size
 				descr = ' '.join(rpsl.inetnum[range].get('descr',[]))
 				remarks = ' '.join(rpsl.inetnum[range].get('remarks',[]))
 
@@ -236,7 +237,7 @@ function showPrefixAlert(id) {
 						border = color['black']
 
 					try:
-						back = background[slash[incr]]
+						back = background[slash[block_size]]
 					except KeyError:
 						back = color['grey']
 
