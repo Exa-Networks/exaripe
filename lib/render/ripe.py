@@ -22,6 +22,10 @@ class RPSL (object):
 		self.data += data
 
 	def complete (self):
+		# durty hack as we do not know the encoding used by RIPE
+		def _sanitise(data):
+			return ''.join((_ if ord(_) in range(128) else '?'  for _ in data))
+
 		for line in self.data.split('\n'):
 			if line == '': continue
 			if line.startswith('%'): continue
@@ -45,9 +49,9 @@ class RPSL (object):
 				self.inetnum[self.key]['length'] = IP(end).value - IP(self.key).value + 1
 
 			if self.inetnum[self.key].has_key(key):
-				self.inetnum[self.key][key].append(value.strip())
+				self.inetnum[self.key][key].append(_sanitise(value.strip()))
 			else:
-				self.inetnum[self.key][key] = [value.strip()]
+				self.inetnum[self.key][key] = [_sanitise(value.strip())]
 
 	def __str__ (self):
 		r = ''
