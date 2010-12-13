@@ -98,7 +98,7 @@ class SVG (object):
 		self.link = os.path.join(self.prefix,name)
 		left = (self.font*len(cidr[-1])/5) + 10
 		self.width = left + 256*self.size_x + 10
-		self.height = (rpsl.nb24s*self.size_y) + self.top + 1 + 100
+		self.height = ((rpsl.nb24s+8)*self.size_y) + self.top + 1 + 100
 
 		per24 = rpsl.fragment()
 
@@ -133,7 +133,7 @@ class SVG (object):
 			18      : (200, 100, 100),
 		}
 		
-		svg = self._svg(left + self.size_x*256 + 10, (rpsl.nb24s*self.size_y) + self.top + 10)
+		svg = self._svg(self.width, self.height)
 		content = ''
 		tooltips = ''
 
